@@ -1,0 +1,41 @@
+# ColorMeShop::Stock
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**account_id** | **String** | ショップアカウントID | [optional] 
+**product_id** | **Integer** | 商品ID | [optional] 
+**name** | **String** | 商品名 | [optional] 
+**option1_value** | **String** | オプション1の値 | [optional] 
+**option2_value** | **String** | オプション2の値 | [optional] 
+**stocks** | **Integer** | 在庫数 | [optional] 
+**few_num** | **Integer** | 残りわずかとなる在庫数 | [optional] 
+**model_number** | **String** | 型番 | [optional] 
+**category** | **Object** |  | [optional] 
+**display_state** | **String** | 掲載設定 | [optional] 
+**sales_price** | **Integer** | 販売価格 | [optional] 
+**price** | **Integer** | 定価 | [optional] 
+**members_price** | **Integer** | 会員価格 | [optional] 
+**cost** | **Integer** | 原価 | [optional] 
+**delivery_charge** | **Integer** | 個別送料 | [optional] 
+**min_num** | **Integer** | 最小購入数量 | [optional] 
+**max_num** | **Integer** | 最大購入数量 | [optional] 
+**sale_start_date** | **Integer** | 掲載開始時刻 | [optional] 
+**sale_end_date** | **Integer** | 掲載終了時刻 | [optional] 
+**unit** | **String** | 単位 | [optional] 
+**weight** | **Integer** | 重量(グラム単位) | [optional] 
+**soldout_display** | **BOOLEAN** | 売り切れているときもショップに表示するか | [optional] 
+**sort** | **Integer** | 表示順 | [optional] 
+**simple_expl** | **String** | 簡易説明 | [optional] 
+**expl** | **String** | 商品説明 | [optional] 
+**mobile_expl** | **String** | フィーチャーフォン向けショップの商品説明 | [optional] 
+**smartphone_expl** | **String** | スマホ向けショップの商品説明 | [optional] 
+**make_date** | **Integer** | 商品作成日時 | [optional] 
+**update_date** | **Integer** | 商品更新日時 | [optional] 
+**memo** | **String** | 備考 | [optional] 
+**image_url** | **String** | メインの商品画像URL | [optional] 
+**mobile_image_url** | **String** | メインの商品画像のモバイル用URL | [optional] 
+**thumbnail_image_url** | **String** | メインの商品画像のサムネイルURL | [optional] 
+**images** | **Array&lt;Object&gt;** | メインの商品画像以外の3つの画像に関する、PC用とモバイル用の画像URL | [optional] 
+
+
