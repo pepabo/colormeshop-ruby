@@ -32,7 +32,7 @@ end
 api_instance = ColorMeShop::SaleApi.new
 sale_id = 56 # Integer | 
 opts = {
-  unknown_base_type: ColorMeShop::UNKNOWN_BASE_TYPE.new # Object | 
+  unknown_base_type: ColorMeShop::UNKNOWN_BASE_TYPE.new # UNKNOWN_BASE_TYPE | 
 }
 
 begin
@@ -49,7 +49,7 @@ end
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **sale_id** | **Integer**|  | 
- **unknown_base_type** | [**Object**](UNKNOWN_BASE_TYPE.md)|  | [optional] 
+ **unknown_base_type** | [**UNKNOWN_BASE_TYPE**](UNKNOWN_BASE_TYPE.md)|  | [optional] 
 
 ### Return type
 
@@ -224,7 +224,7 @@ end
 api_instance = ColorMeShop::SaleApi.new
 sale_id = 56 # Integer | 
 opts = {
-  unknown_base_type: ColorMeShop::UNKNOWN_BASE_TYPE.new # Object | 
+  unknown_base_type: ColorMeShop::UNKNOWN_BASE_TYPE.new # UNKNOWN_BASE_TYPE | 
 }
 
 begin
@@ -240,7 +240,7 @@ end
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **sale_id** | **Integer**|  | 
- **unknown_base_type** | [**Object**](UNKNOWN_BASE_TYPE.md)|  | [optional] 
+ **unknown_base_type** | [**UNKNOWN_BASE_TYPE**](UNKNOWN_BASE_TYPE.md)|  | [optional] 
 
 ### Return type
 
@@ -327,7 +327,7 @@ end
 api_instance = ColorMeShop::SaleApi.new
 sale_id = 56 # Integer | 
 opts = {
-  unknown_base_type: ColorMeShop::UNKNOWN_BASE_TYPE.new # Object | 
+  unknown_base_type: ColorMeShop::UNKNOWN_BASE_TYPE.new # UNKNOWN_BASE_TYPE | 
 }
 
 begin
@@ -344,7 +344,7 @@ end
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **sale_id** | **Integer**|  | 
- **unknown_base_type** | [**Object**](UNKNOWN_BASE_TYPE.md)|  | [optional] 
+ **unknown_base_type** | [**UNKNOWN_BASE_TYPE**](UNKNOWN_BASE_TYPE.md)|  | [optional] 
 
 ### Return type
 

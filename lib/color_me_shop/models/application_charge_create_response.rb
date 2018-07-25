@@ -13,118 +13,68 @@ OpenAPI Generator version: 3.1.2-SNAPSHOT
 require 'date'
 
 module ColorMeShop
-  class SaleDelivery
-    # 配送ID
+  class ApplicationChargeCreateResponse
+    # 課金ID
     attr_accessor :id
 
-    # ショップアカウントID
+    # アカウントID
     attr_accessor :account_id
 
-    # 売上ID
-    attr_accessor :sale_id
+    # アプリケーションID
+    attr_accessor :oauth_application_id
 
-    # 使用された配送方法ID
-    attr_accessor :delivery_id
+    # 課金プランID
+    attr_accessor :application_charge_plan_id
 
-    # この配送に含まれる受注明細IDの配列
-    attr_accessor :detail_ids
+    # ショップオーナー様が課金の許可/拒否を行った後に遷移するURL
+    attr_accessor :return_url
 
-    # 宛名
-    attr_accessor :name
+    # ショップオーナー様が課金のOK/NGを行う確認画面ページのURLです。 URLには課金IDとsignatureを含んでいます。 
+    attr_accessor :confirmation_url
 
-    # 宛名のフリガナ
-    attr_accessor :furigana
+    # ステータス
+    attr_accessor :status
 
-    # 郵便番号
-    attr_accessor :postal
+    # 作成日時
+    attr_accessor :make_date
 
-    # 都道府県の通し番号。北海道が1、沖縄が47
-    attr_accessor :pref_id
+    # 更新日時
+    attr_accessor :update_date
 
-    # 都道府県名
-    attr_accessor :pref_name
+    class EnumAttributeValidator
+      attr_reader :datatype
+      attr_reader :allowable_values
 
-    # 住所1
-    attr_accessor :address1
+      def initialize(datatype, allowable_values)
+        @allowable_values = allowable_values.map do |value|
+          case datatype.to_s
+          when /Integer/i
+            value.to_i
+          when /Float/i
+            value.to_f
+          else
+            value
+          end
+        end
+      end
 
-    # 住所2
-    attr_accessor :address2
-
-    # 電話番号
-    attr_accessor :tel
-
-    # 配送希望日
-    attr_accessor :preferred_date
-
-    # 配送希望時間帯
-    attr_accessor :preferred_period
-
-    # 配送伝票番号
-    attr_accessor :slip_number
-
-    # 熨斗の文言
-    attr_accessor :noshi_text
-
-    # 熨斗の料金
-    attr_accessor :noshi_charge
-
-    # メッセージカードの表示名
-    attr_accessor :card_name
-
-    # メッセージカードのテキスト
-    attr_accessor :card_text
-
-    # メッセージカードの料金
-    attr_accessor :card_charge
-
-    # ラッピングの表示名
-    attr_accessor :wrapping_name
-
-    # ラッピングの料金
-    attr_accessor :wrapping_charge
-
-    # 配送料
-    attr_accessor :delivery_charge
-
-    # 配送料・手数料の小計
-    attr_accessor :total_charge
-
-    # 備考
-    attr_accessor :memo
-
-    # 発送済みであるか否か
-    attr_accessor :delivered
+      def valid?(value)
+        !value || allowable_values.include?(value)
+      end
+    end
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'id' => :'id',
         :'account_id' => :'account_id',
-        :'sale_id' => :'sale_id',
-        :'delivery_id' => :'delivery_id',
-        :'detail_ids' => :'detail_ids',
-        :'name' => :'name',
-        :'furigana' => :'furigana',
-        :'postal' => :'postal',
-        :'pref_id' => :'pref_id',
-        :'pref_name' => :'pref_name',
-        :'address1' => :'address1',
-        :'address2' => :'address2',
-        :'tel' => :'tel',
-        :'preferred_date' => :'preferred_date',
-        :'preferred_period' => :'preferred_period',
-        :'slip_number' => :'slip_number',
-        :'noshi_text' => :'noshi_text',
-        :'noshi_charge' => :'noshi_charge',
-        :'card_name' => :'card_name',
-        :'card_text' => :'card_text',
-        :'card_charge' => :'card_charge',
-        :'wrapping_name' => :'wrapping_name',
-        :'wrapping_charge' => :'wrapping_charge',
-        :'delivery_charge' => :'delivery_charge',
-        :'total_charge' => :'total_charge',
-        :'memo' => :'memo',
-        :'delivered' => :'delivered'
+        :'oauth_application_id' => :'oauth_application_id',
+        :'application_charge_plan_id' => :'application_charge_plan_id',
+        :'return_url' => :'return_url',
+        :'confirmation_url' => :'confirmation_url',
+        :'status' => :'status',
+        :'make_date' => :'make_date',
+        :'update_date' => :'update_date'
       }
     end
 
@@ -133,31 +83,13 @@ module ColorMeShop
       {
         :'id' => :'Integer',
         :'account_id' => :'String',
-        :'sale_id' => :'Integer',
-        :'delivery_id' => :'Integer',
-        :'detail_ids' => :'Array<Integer>',
-        :'name' => :'String',
-        :'furigana' => :'String',
-        :'postal' => :'String',
-        :'pref_id' => :'Integer',
-        :'pref_name' => :'String',
-        :'address1' => :'String',
-        :'address2' => :'String',
-        :'tel' => :'String',
-        :'preferred_date' => :'String',
-        :'preferred_period' => :'String',
-        :'slip_number' => :'String',
-        :'noshi_text' => :'String',
-        :'noshi_charge' => :'Integer',
-        :'card_name' => :'String',
-        :'card_text' => :'String',
-        :'card_charge' => :'Integer',
-        :'wrapping_name' => :'String',
-        :'wrapping_charge' => :'Integer',
-        :'delivery_charge' => :'Integer',
-        :'total_charge' => :'Integer',
-        :'memo' => :'String',
-        :'delivered' => :'BOOLEAN'
+        :'oauth_application_id' => :'Integer',
+        :'application_charge_plan_id' => :'Integer',
+        :'return_url' => :'String',
+        :'confirmation_url' => :'String',
+        :'status' => :'String',
+        :'make_date' => :'Integer',
+        :'update_date' => :'Integer'
       }
     end
 
@@ -177,106 +109,32 @@ module ColorMeShop
         self.account_id = attributes[:'account_id']
       end
 
-      if attributes.has_key?(:'sale_id')
-        self.sale_id = attributes[:'sale_id']
+      if attributes.has_key?(:'oauth_application_id')
+        self.oauth_application_id = attributes[:'oauth_application_id']
       end
 
-      if attributes.has_key?(:'delivery_id')
-        self.delivery_id = attributes[:'delivery_id']
+      if attributes.has_key?(:'application_charge_plan_id')
+        self.application_charge_plan_id = attributes[:'application_charge_plan_id']
       end
 
-      if attributes.has_key?(:'detail_ids')
-        if (value = attributes[:'detail_ids']).is_a?(Array)
-          self.detail_ids = value
-        end
+      if attributes.has_key?(:'return_url')
+        self.return_url = attributes[:'return_url']
       end
 
-      if attributes.has_key?(:'name')
-        self.name = attributes[:'name']
+      if attributes.has_key?(:'confirmation_url')
+        self.confirmation_url = attributes[:'confirmation_url']
       end
 
-      if attributes.has_key?(:'furigana')
-        self.furigana = attributes[:'furigana']
+      if attributes.has_key?(:'status')
+        self.status = attributes[:'status']
       end
 
-      if attributes.has_key?(:'postal')
-        self.postal = attributes[:'postal']
+      if attributes.has_key?(:'make_date')
+        self.make_date = attributes[:'make_date']
       end
 
-      if attributes.has_key?(:'pref_id')
-        self.pref_id = attributes[:'pref_id']
-      end
-
-      if attributes.has_key?(:'pref_name')
-        self.pref_name = attributes[:'pref_name']
-      end
-
-      if attributes.has_key?(:'address1')
-        self.address1 = attributes[:'address1']
-      end
-
-      if attributes.has_key?(:'address2')
-        self.address2 = attributes[:'address2']
-      end
-
-      if attributes.has_key?(:'tel')
-        self.tel = attributes[:'tel']
-      end
-
-      if attributes.has_key?(:'preferred_date')
-        self.preferred_date = attributes[:'preferred_date']
-      end
-
-      if attributes.has_key?(:'preferred_period')
-        self.preferred_period = attributes[:'preferred_period']
-      end
-
-      if attributes.has_key?(:'slip_number')
-        self.slip_number = attributes[:'slip_number']
-      end
-
-      if attributes.has_key?(:'noshi_text')
-        self.noshi_text = attributes[:'noshi_text']
-      end
-
-      if attributes.has_key?(:'noshi_charge')
-        self.noshi_charge = attributes[:'noshi_charge']
-      end
-
-      if attributes.has_key?(:'card_name')
-        self.card_name = attributes[:'card_name']
-      end
-
-      if attributes.has_key?(:'card_text')
-        self.card_text = attributes[:'card_text']
-      end
-
-      if attributes.has_key?(:'card_charge')
-        self.card_charge = attributes[:'card_charge']
-      end
-
-      if attributes.has_key?(:'wrapping_name')
-        self.wrapping_name = attributes[:'wrapping_name']
-      end
-
-      if attributes.has_key?(:'wrapping_charge')
-        self.wrapping_charge = attributes[:'wrapping_charge']
-      end
-
-      if attributes.has_key?(:'delivery_charge')
-        self.delivery_charge = attributes[:'delivery_charge']
-      end
-
-      if attributes.has_key?(:'total_charge')
-        self.total_charge = attributes[:'total_charge']
-      end
-
-      if attributes.has_key?(:'memo')
-        self.memo = attributes[:'memo']
-      end
-
-      if attributes.has_key?(:'delivered')
-        self.delivered = attributes[:'delivered']
+      if attributes.has_key?(:'update_date')
+        self.update_date = attributes[:'update_date']
       end
     end
 
@@ -290,7 +148,19 @@ module ColorMeShop
     # Check to see if the all the properties in the model are valid
     # @return true if the model is valid
     def valid?
+      status_validator = EnumAttributeValidator.new('String', ['pending', 'accepted', 'declined', 'active', 'expired'])
+      return false unless status_validator.valid?(@status)
       true
+    end
+
+    # Custom attribute writer method checking allowed values (enum).
+    # @param [Object] status Object to be assigned
+    def status=(status)
+      validator = EnumAttributeValidator.new('String', ['pending', 'accepted', 'declined', 'active', 'expired'])
+      unless validator.valid?(status)
+        fail ArgumentError, 'invalid value for "status", must be one of #{validator.allowable_values}.'
+      end
+      @status = status
     end
 
     # Checks equality by comparing each attribute.
@@ -300,31 +170,13 @@ module ColorMeShop
       self.class == o.class &&
           id == o.id &&
           account_id == o.account_id &&
-          sale_id == o.sale_id &&
-          delivery_id == o.delivery_id &&
-          detail_ids == o.detail_ids &&
-          name == o.name &&
-          furigana == o.furigana &&
-          postal == o.postal &&
-          pref_id == o.pref_id &&
-          pref_name == o.pref_name &&
-          address1 == o.address1 &&
-          address2 == o.address2 &&
-          tel == o.tel &&
-          preferred_date == o.preferred_date &&
-          preferred_period == o.preferred_period &&
-          slip_number == o.slip_number &&
-          noshi_text == o.noshi_text &&
-          noshi_charge == o.noshi_charge &&
-          card_name == o.card_name &&
-          card_text == o.card_text &&
-          card_charge == o.card_charge &&
-          wrapping_name == o.wrapping_name &&
-          wrapping_charge == o.wrapping_charge &&
-          delivery_charge == o.delivery_charge &&
-          total_charge == o.total_charge &&
-          memo == o.memo &&
-          delivered == o.delivered
+          oauth_application_id == o.oauth_application_id &&
+          application_charge_plan_id == o.application_charge_plan_id &&
+          return_url == o.return_url &&
+          confirmation_url == o.confirmation_url &&
+          status == o.status &&
+          make_date == o.make_date &&
+          update_date == o.update_date
     end
 
     # @see the `==` method
@@ -336,7 +188,7 @@ module ColorMeShop
     # Calculates hash code according to all attributes.
     # @return [Fixnum] Hash code
     def hash
-      [id, account_id, sale_id, delivery_id, detail_ids, name, furigana, postal, pref_id, pref_name, address1, address2, tel, preferred_date, preferred_period, slip_number, noshi_text, noshi_charge, card_name, card_text, card_charge, wrapping_name, wrapping_charge, delivery_charge, total_charge, memo, delivered].hash
+      [id, account_id, oauth_application_id, application_charge_plan_id, return_url, confirmation_url, status, make_date, update_date].hash
     end
 
     # Builds the object from hash

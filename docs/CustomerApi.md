@@ -143,7 +143,7 @@ ColorMeShop.configure do |config|
 end
 
 api_instance = ColorMeShop::CustomerApi.new
-unknown_base_type = ColorMeShop::UNKNOWN_BASE_TYPE.new # Object | 
+unknown_base_type = ColorMeShop::UNKNOWN_BASE_TYPE.new # UNKNOWN_BASE_TYPE | 
 
 begin
   #顧客データを追加
@@ -158,7 +158,7 @@ end
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **unknown_base_type** | [**Object**](UNKNOWN_BASE_TYPE.md)|  | 
+ **unknown_base_type** | [**UNKNOWN_BASE_TYPE**](UNKNOWN_BASE_TYPE.md)|  | 
 
 ### Return type
 

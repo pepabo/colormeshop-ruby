@@ -210,7 +210,7 @@ end
 
 api_instance = ColorMeShop::ProductApi.new
 product_id = 56 # Integer | 商品ID
-unknown_base_type = ColorMeShop::UNKNOWN_BASE_TYPE.new # Object | 
+unknown_base_type = ColorMeShop::UNKNOWN_BASE_TYPE.new # UNKNOWN_BASE_TYPE | 
 
 begin
   #おすすめ商品情報の追加
@@ -226,7 +226,7 @@ end
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **product_id** | **Integer**| 商品ID | 
- **unknown_base_type** | [**Object**](UNKNOWN_BASE_TYPE.md)|  | 
+ **unknown_base_type** | [**UNKNOWN_BASE_TYPE**](UNKNOWN_BASE_TYPE.md)|  | 
 
 ### Return type
 

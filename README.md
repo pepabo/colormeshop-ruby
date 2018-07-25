@@ -193,6 +193,15 @@ All URIs are relative to *https://api.shop-pro.jp/*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *ColorMeShop::CategoryApi* | [**get_product_categories**](docs/CategoryApi.md#get_product_categories) | **GET** /v1/categories.json | 商品カテゴリー一覧を取得
+*ColorMeShop::ChargeApi* | [**activate_application_charge**](docs/ChargeApi.md#activate_application_charge) | **POST** /v1/application_charges/{applicationChargeId}/activate.json | スポット課金データをアクティベートする
+*ColorMeShop::ChargeApi* | [**activate_recurring_application_charge**](docs/ChargeApi.md#activate_recurring_application_charge) | **POST** /v1/recurring_application_charges/{recurringApplicationChargeId}/activate.json | 月額課金データをアクティベートする
+*ColorMeShop::ChargeApi* | [**cancel_recurring_application_charge**](docs/ChargeApi.md#cancel_recurring_application_charge) | **POST** /v1/recurring_application_charges/{recurringApplicationChargeId}/cancel.json | 月額課金データをキャンセルする
+*ColorMeShop::ChargeApi* | [**get_application_charge**](docs/ChargeApi.md#get_application_charge) | **GET** /v1/application_charges/{applicationChargeId}.json | スポット課金データの取得
+*ColorMeShop::ChargeApi* | [**get_application_charges**](docs/ChargeApi.md#get_application_charges) | **GET** /v1/application_charges.json | スポット課金一覧の取得
+*ColorMeShop::ChargeApi* | [**get_recurring_application_charge**](docs/ChargeApi.md#get_recurring_application_charge) | **GET** /v1/recurring_application_charges/{recurringApplicationChargeId}.json | 月額課金データの取得
+*ColorMeShop::ChargeApi* | [**get_recurring_application_charges**](docs/ChargeApi.md#get_recurring_application_charges) | **GET** /v1/recurring_application_charges.json | 月額課金一覧の取得
+*ColorMeShop::ChargeApi* | [**post_application_charge**](docs/ChargeApi.md#post_application_charge) | **POST** /v1/application_charges.json | スポット課金データの作成
+*ColorMeShop::ChargeApi* | [**post_recurring_application_charge**](docs/ChargeApi.md#post_recurring_application_charge) | **POST** /v1/recurring_application_charges.json | 月額課金データの作成
 *ColorMeShop::CustomerApi* | [**get_customer**](docs/CustomerApi.md#get_customer) | **GET** /v1/customers/{customerId}.json | 顧客データの取得
 *ColorMeShop::CustomerApi* | [**get_customers**](docs/CustomerApi.md#get_customers) | **GET** /v1/customers.json | 顧客データのリストを取得
 *ColorMeShop::CustomerApi* | [**post_customers**](docs/CustomerApi.md#post_customers) | **POST** /v1/customers.json | 顧客データを追加
@@ -224,6 +233,8 @@ Class | Method | HTTP request | Description
 
 ## Documentation for Models
 
+ - [ColorMeShop::ApplicationCharge](docs/ApplicationCharge.md)
+ - [ColorMeShop::ApplicationChargeCreateResponse](docs/ApplicationChargeCreateResponse.md)
  - [ColorMeShop::Customer](docs/Customer.md)
  - [ColorMeShop::Delivery](docs/Delivery.md)
  - [ColorMeShop::DeliveryChargeByPrefecture](docs/DeliveryChargeByPrefecture.md)
@@ -237,6 +248,8 @@ Class | Method | HTTP request | Description
  - [ColorMeShop::ProductPickup](docs/ProductPickup.md)
  - [ColorMeShop::ProductUpdateRequest](docs/ProductUpdateRequest.md)
  - [ColorMeShop::ProductVariant](docs/ProductVariant.md)
+ - [ColorMeShop::RecurringApplicationCharge](docs/RecurringApplicationCharge.md)
+ - [ColorMeShop::RecurringApplicationChargeCreateResponse](docs/RecurringApplicationChargeCreateResponse.md)
  - [ColorMeShop::Sale](docs/Sale.md)
  - [ColorMeShop::SaleDelivery](docs/SaleDelivery.md)
  - [ColorMeShop::SaleDetail](docs/SaleDetail.md)
