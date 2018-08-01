@@ -27,7 +27,7 @@ ColorMeShop.configure do |config|
 end
 
 api_instance = ColorMeShop::ScriptApi.new
-unknown_base_type = ColorMeShop::UNKNOWN_BASE_TYPE.new # Object | 作成するスクリプトタグの情報
+unknown_base_type = ColorMeShop::UNKNOWN_BASE_TYPE.new # UNKNOWN_BASE_TYPE | 作成するスクリプトタグの情報
 
 begin
   #スクリプトタグの作成
@@ -42,7 +42,7 @@ end
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **unknown_base_type** | [**Object**](UNKNOWN_BASE_TYPE.md)| 作成するスクリプトタグの情報 | 
+ **unknown_base_type** | [**UNKNOWN_BASE_TYPE**](UNKNOWN_BASE_TYPE.md)| 作成するスクリプトタグの情報 | 
 
 ### Return type
 
@@ -215,7 +215,7 @@ end
 
 api_instance = ColorMeShop::ScriptApi.new
 script_tag_id = 56 # Integer | 
-unknown_base_type = ColorMeShop::UNKNOWN_BASE_TYPE.new # Object | 作成するスクリプトタグの情報
+unknown_base_type = ColorMeShop::UNKNOWN_BASE_TYPE.new # UNKNOWN_BASE_TYPE | 作成するスクリプトタグの情報
 
 begin
   #スクリプトタグの更新
@@ -231,7 +231,7 @@ end
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **script_tag_id** | **Integer**|  | 
- **unknown_base_type** | [**Object**](UNKNOWN_BASE_TYPE.md)| 作成するスクリプトタグの情報 | 
+ **unknown_base_type** | [**UNKNOWN_BASE_TYPE**](UNKNOWN_BASE_TYPE.md)| 作成するスクリプトタグの情報 | 
 
 ### Return type
 
