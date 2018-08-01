@@ -1,6 +1,6 @@
 # ColorMeShop::ChargeApi
 
-All URIs are relative to *https://api.shop-pro.jp/*
+All URIs are relative to *https://api.shop-pro.jp*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
