@@ -122,6 +122,8 @@ module ColorMeShop
       query_params[:'make_date_max'] = opts[:'make_date_max'] if !opts[:'make_date_max'].nil?
       query_params[:'update_date_min'] = opts[:'update_date_min'] if !opts[:'update_date_min'].nil?
       query_params[:'update_date_max'] = opts[:'update_date_max'] if !opts[:'update_date_max'].nil?
+      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
+      query_params[:'offset'] = opts[:'offset'] if !opts[:'offset'].nil?
 
       # header parameters
       header_params = {}
