@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+- [Support Ruby 3.0 and 3.1](https://github.com/pepabo/colormeshop-ruby/pull/10)
+
 ## 1.1.1 - 2023-02-24
 
 ### Added
