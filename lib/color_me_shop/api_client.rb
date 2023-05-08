@@ -10,6 +10,7 @@ OpenAPI Generator version: 3.2.0-SNAPSHOT
 
 =end
 
+require 'addressable'
 require 'date'
 require 'json'
 require 'logger'
@@ -264,7 +265,7 @@ module ColorMeShop
     def build_request_url(path)
       # Add leading and trailing slashes to path
       path = "/#{path}".gsub(/\/+/, '/')
-      CGI.escape(@config.base_url + path)
+      Addressable::URI.escape(@config.base_url + path)
     end
 
     # Builds the HTTP request body
