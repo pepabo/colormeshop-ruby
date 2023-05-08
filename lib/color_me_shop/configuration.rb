@@ -10,6 +10,7 @@ OpenAPI Generator version: 3.2.0-SNAPSHOT
 
 =end
 
+require 'addressable'
 require 'uri'
 
 module ColorMeShop
@@ -175,7 +176,7 @@ module ColorMeShop
 
     def base_url
       url = "#{scheme}://#{[host, base_path].join('/').gsub(/\/+/, '/')}".sub(/\/+\z/, '')
-      CGI.escape(url)
+      Addressable::URI.escape(url)
     end
 
     # Gets API key (with prefix if set).
