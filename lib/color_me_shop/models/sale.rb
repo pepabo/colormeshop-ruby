@@ -1,16 +1,17 @@
 =begin
 #カラーミーショップ API
 
-## カラーミーショップ API  [カラーミーショップ](https://shop-pro.jp) APIでは、受注の検索や商品情報の更新を行うことができます。  ## 利用手順  はじめに、カラーミーデベロッパーアカウントを用意します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。  次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリケーション登録を行ってください。 スマートフォンのWebViewを利用する場合は、リダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を入力してください。  その後、カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。  |パラメータ名|値| |---|---| |`client_id`|アプリケーション詳細画面で確認できるクライアントID| |`response_type`|\"code\"という文字列| |`scope`| 別表参照| |`redirect_url`|アプリケーション登録時に入力したリダイレクトURL|  `scope`は、以下のうち、アプリケーションが利用したい機能をスペース区切りで指定してください。  |スコープ|機能| |---|---| |`read_products`|商品データの参照| |`write_products`|在庫データの更新| |`read_sales`|受注・顧客データの参照| |`write_sales`|受注データの更新|  以下のようなURLとなります。  ``` https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URL&response_type=code&scope=read_products%20write_products ```  初めてこのページを訪れる場合は、カラーミーショップアカウントのIDとパスワードの入力を求められます。 承認ボタンを押すと、このアプリケーションがショップのデータにアクセスすることが許可され、リダイレクトURLへリダイレクトされます。  承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、 `error`パラメータにエラーの内容を表す文字列が与えられます。  アプリケーション登録時のリダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされます。 末尾のパスが認可コードになっています。  ``` https://api.shop-pro.jp/oauth/authorize/AUTH_CODE ```  認可コードの有効期限は発行から10分間です。  最後に、認可コードとアクセストークンを交換します。以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。  |パラメータ名|値| |---|---| |`client_id`|アプリケーション詳細画面に表示されているクライアントID| |`client_secret`|アプリケーション詳細画面に表示されているクライアントシークレット| |`code`|取得した認可コード| |`grant_type`|\"authorization_code\"という文字列| |`redirect_uri`|アプリケーション登録時に入力したリダイレクトURL|  ```console # curl での例  $ curl -X POST \\   -d'client_id=CLIENT_ID' \\   -d'client_secret=CLIENT_SECRET' \\   -d'code=CODE' \\   -d'grant_type=authorization_code'   \\   -d'redirect_uri=REDIRECT_URI'  \\   'https://api.shop-pro.jp/oauth/token' ```  リクエストが成功すると、以下のようなJSONが返ってきます。  ```json {   \"access_token\": \"d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX\",   \"token_type\": \"bearer\",   \"scope\": \"read_products write_products\" } ```  アクセストークンに有効期限はありませんが、許可済みアプリケーション一覧画面から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。  取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する際の例を示します。  ```console # curlの例  $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json ```  ## エラー  カラーミーショップAPI v1では  - エラーコード - エラーメッセージ - ステータスコード  の配列でエラーを表現します。以下に例を示します。  ```json {   \"errors\": [     {       \"code\": 404100,       \"message\": \"レコードが見つかりませんでした。\",       \"status\": 404     }   ] } ``` 
+## カラーミーショップ API  ## 利用手順  ### OAuthアプリケーションの登録  デベロッパーアカウントをお持ちでない場合は作成します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。  次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリ登録を行ってください。 スマートフォンのWebViewを利用する場合は、リダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を入力してください。  ### 認可  カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。  |パラメータ名|値| |---|---| |`client_id`|アプリ詳細画面で確認できるクライアントID| |`response_type`|\"code\"を指定| |`scope`| 別表参照| |`redirect_uri`|アプリ登録時に入力したリダイレクトURI|  `scope`は、以下のうち、アプリが利用したい機能をスペース区切りで指定してください。  |スコープ|機能| |---|---| |`read_products`|商品データの参照| |`write_products`|在庫データの更新| |`read_sales`|受注・顧客データの参照| |`write_sales`|受注データの更新| |`read_shop_coupons`|ショップクーポンの参照|  以下のようなURLとなります。  ``` https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&response_type=code&scope=read_products%20write_products ```  初めてこのページを訪れる場合は、カラーミーショップアカウントのログインIDとパスワードの入力を求められます。  ログイン後の認証ページでアプリとの連携が承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、 `error`パラメータにエラーの内容を表す文字列が与えられます。  アプリ登録時のリダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされ、 認可コードがURLの末尾に付与されます。  ``` https://api.shop-pro.jp/oauth/authorize/AUTH_CODE ```  認可コードの有効期限は発行から10分間です。  ### 認可コードをアクセストークンに交換  以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。  |パラメータ名|値| |---|---| |`client_id`|アプリ詳細画面に表示されているクライアントID| |`client_secret`|アプリ詳細画面に表示されているクライアントシークレット| |`code`|取得した認可コード| |`grant_type`|\"authorization_code\"を指定| |`redirect_uri`|アプリ登録時に入力したリダイレクトURI|  curlによるリクエストの例を以下に示します。 ```console $ curl -X POST \\   -d'client_id=CLIENT_ID' \\   -d'client_secret=CLIENT_SECRET' \\   -d'code=CODE' \\   -d'grant_type=authorization_code'   \\   -d'redirect_uri=REDIRECT_URI'  \\   'https://api.shop-pro.jp/oauth/token' ```  リクエストが成功すると、以下のようなJSONが返却されます  ```json {   \"access_token\": \"d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX\",   \"token_type\": \"bearer\",   \"scope\": \"read_products write_products\" } ```  アクセストークンに有効期限はありませんが、[許可済みアプリ一覧画面](https://admin.shop-pro.jp/?mode=app_use_lst)から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。  ### APIの利用  取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する例を示します。  ```console $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json ```  ## エラー  カラーミーショップAPIでは、以下の形式の配列でエラーを表現します。  - `code` エラーコード - `message` エラーメッセージ - `status` ステータスコード  ```json {   \"errors\": [     {       \"code\": 404100,       \"message\": \"レコードが見つかりませんでした。\",       \"status\": 404     }   ] } ```  ## 都道府県コードについて APIを利用して都道府県コードを更新したり、レスポンスを参照される際には以下の表を参考にしてください。  <details>   <summary>都道府県コード一覧</summary>    |id|都道府県|   |---|---|   |1|北海道|   |2|青森県|   |3|岩手県|   |4|秋田県|   |5|宮城県|   |6|山形県|   |7|福島県|   |8|茨城県|   |9|栃木県|   |10|群馬県|   |11|埼玉県|   |12|千葉県|   |13|東京都|   |14|神奈川県|   |15|新潟県|   |16|福井県|   |17|石川県|   |18|富山県|   |19|静岡県|   |20|山梨県|   |21|長野県|   |22|愛知県|   |23|岐阜県|   |24|三重県|   |25|和歌山県|   |26|滋賀県|   |27|奈良県|   |28|京都府|   |29|大阪府|   |30|兵庫県|   |31|岡山県|   |32|広島県|   |33|鳥取県|   |34|島根県|   |35|山口県|   |36|香川県|   |37|徳島県|   |38|愛媛県|   |39|高知県|   |40|福岡県|   |41|佐賀県|   |42|長崎県|   |43|大分県|   |44|熊本県|   |45|宮崎県|   |46|鹿児島県|   |47|沖縄県|   |48|海外|  </details> 
 
-OpenAPI spec version: 1.0.0
+The version of the OpenAPI document: 1.0.0
 
 Generated by: https://openapi-generator.tech
-OpenAPI Generator version: 3.2.0-SNAPSHOT
+OpenAPI Generator version: 7.2.0-SNAPSHOT
 
 =end
 
 require 'date'
+require 'time'
 
 module ColorMeShop
   class Sale
@@ -125,11 +126,18 @@ module ColorMeShop
     # 使用されたYahooポイント数
     attr_accessor :use_yahoo_points
 
+    # 外部システムで発行された決済識別番号  該当受注の決済が、楽天ペイ（オンライン決済）、LINE Pay、PayPal Commerce Platform、Amazon Pay、Amazon Pay V2、Square対面決済のいずれかである場合、その決済の決済識別番号を返します。 それ以外の決済に関しては空文字列を返します。 
+    attr_accessor :external_order_id
+
     attr_accessor :customer
 
     attr_accessor :details
 
     attr_accessor :sale_deliveries
+
+    attr_accessor :segment
+
+    attr_accessor :totals
 
     class EnumAttributeValidator
       attr_reader :datatype
@@ -193,10 +201,18 @@ module ColorMeShop
         :'use_gmo_points' => :'use_gmo_points',
         :'granted_yahoo_points' => :'granted_yahoo_points',
         :'use_yahoo_points' => :'use_yahoo_points',
+        :'external_order_id' => :'external_order_id',
         :'customer' => :'customer',
         :'details' => :'details',
-        :'sale_deliveries' => :'sale_deliveries'
+        :'sale_deliveries' => :'sale_deliveries',
+        :'segment' => :'segment',
+        :'totals' => :'totals'
       }
+    end
+
+    # Returns all the JSON keys this model knows about
+    def self.acceptable_attributes
+      attribute_map.values
     end
 
     # Attribute type mapping.
@@ -208,10 +224,10 @@ module ColorMeShop
         :'update_date' => :'Integer',
         :'memo' => :'String',
         :'payment_id' => :'Integer',
-        :'mobile' => :'BOOLEAN',
-        :'paid' => :'BOOLEAN',
-        :'delivered' => :'BOOLEAN',
-        :'canceled' => :'BOOLEAN',
+        :'mobile' => :'Boolean',
+        :'paid' => :'Boolean',
+        :'delivered' => :'Boolean',
+        :'canceled' => :'Boolean',
         :'accepted_mail_state' => :'String',
         :'paid_mail_state' => :'String',
         :'delivered_mail_state' => :'String',
@@ -239,188 +255,225 @@ module ColorMeShop
         :'use_gmo_points' => :'Integer',
         :'granted_yahoo_points' => :'Integer',
         :'use_yahoo_points' => :'Integer',
-        :'customer' => :'Customer',
-        :'details' => :'Array<SaleDetail>',
-        :'sale_deliveries' => :'Array<SaleDelivery>'
+        :'external_order_id' => :'String',
+        :'customer' => :'GetSales200ResponseSalesInnerCustomer',
+        :'details' => :'Array<GetSales200ResponseSalesInnerDetailsInner>',
+        :'sale_deliveries' => :'Array<GetSales200ResponseSalesInnerSaleDeliveriesInner>',
+        :'segment' => :'GetSales200ResponseSalesInnerSegment',
+        :'totals' => :'GetSales200ResponseSalesInnerTotals'
       }
+    end
+
+    # List of attributes with nullable: true
+    def self.openapi_nullable
+      Set.new([
+        :'memo',
+        :'accepted_mail_sent_date',
+        :'paid_mail_sent_date',
+        :'delivered_mail_sent_date',
+        :'gmo_point_state',
+        :'yahoo_point_state',
+        :'segment',
+        :'totals'
+      ])
     end
 
     # Initializes the object
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
-      return unless attributes.is_a?(Hash)
+      if (!attributes.is_a?(Hash))
+        fail ArgumentError, "The input argument (attributes) must be a hash in `ColorMeShop::Sale` initialize method"
+      end
 
-      # convert string to symbol for hash key
-      attributes = attributes.each_with_object({}) { |(k, v), h| h[k.to_sym] = v }
+      # check to see if the attribute exists and convert string to symbol for hash key
+      attributes = attributes.each_with_object({}) { |(k, v), h|
+        if (!self.class.attribute_map.key?(k.to_sym))
+          fail ArgumentError, "`#{k}` is not a valid attribute in `ColorMeShop::Sale`. Please check the name to make sure it's valid. List of attributes: " + self.class.attribute_map.keys.inspect
+        end
+        h[k.to_sym] = v
+      }
 
-      if attributes.has_key?(:'id')
+      if attributes.key?(:'id')
         self.id = attributes[:'id']
       end
 
-      if attributes.has_key?(:'account_id')
+      if attributes.key?(:'account_id')
         self.account_id = attributes[:'account_id']
       end
 
-      if attributes.has_key?(:'make_date')
+      if attributes.key?(:'make_date')
         self.make_date = attributes[:'make_date']
       end
 
-      if attributes.has_key?(:'update_date')
+      if attributes.key?(:'update_date')
         self.update_date = attributes[:'update_date']
       end
 
-      if attributes.has_key?(:'memo')
+      if attributes.key?(:'memo')
         self.memo = attributes[:'memo']
       end
 
-      if attributes.has_key?(:'payment_id')
+      if attributes.key?(:'payment_id')
         self.payment_id = attributes[:'payment_id']
       end
 
-      if attributes.has_key?(:'mobile')
+      if attributes.key?(:'mobile')
         self.mobile = attributes[:'mobile']
       end
 
-      if attributes.has_key?(:'paid')
+      if attributes.key?(:'paid')
         self.paid = attributes[:'paid']
       end
 
-      if attributes.has_key?(:'delivered')
+      if attributes.key?(:'delivered')
         self.delivered = attributes[:'delivered']
       end
 
-      if attributes.has_key?(:'canceled')
+      if attributes.key?(:'canceled')
         self.canceled = attributes[:'canceled']
       end
 
-      if attributes.has_key?(:'accepted_mail_state')
+      if attributes.key?(:'accepted_mail_state')
         self.accepted_mail_state = attributes[:'accepted_mail_state']
       end
 
-      if attributes.has_key?(:'paid_mail_state')
+      if attributes.key?(:'paid_mail_state')
         self.paid_mail_state = attributes[:'paid_mail_state']
       end
 
-      if attributes.has_key?(:'delivered_mail_state')
+      if attributes.key?(:'delivered_mail_state')
         self.delivered_mail_state = attributes[:'delivered_mail_state']
       end
 
-      if attributes.has_key?(:'accepted_mail_sent_date')
+      if attributes.key?(:'accepted_mail_sent_date')
         self.accepted_mail_sent_date = attributes[:'accepted_mail_sent_date']
       end
 
-      if attributes.has_key?(:'paid_mail_sent_date')
+      if attributes.key?(:'paid_mail_sent_date')
         self.paid_mail_sent_date = attributes[:'paid_mail_sent_date']
       end
 
-      if attributes.has_key?(:'delivered_mail_sent_date')
+      if attributes.key?(:'delivered_mail_sent_date')
         self.delivered_mail_sent_date = attributes[:'delivered_mail_sent_date']
       end
 
-      if attributes.has_key?(:'point_state')
+      if attributes.key?(:'point_state')
         self.point_state = attributes[:'point_state']
       end
 
-      if attributes.has_key?(:'gmo_point_state')
+      if attributes.key?(:'gmo_point_state')
         self.gmo_point_state = attributes[:'gmo_point_state']
       end
 
-      if attributes.has_key?(:'yahoo_point_state')
+      if attributes.key?(:'yahoo_point_state')
         self.yahoo_point_state = attributes[:'yahoo_point_state']
       end
 
-      if attributes.has_key?(:'product_total_price')
+      if attributes.key?(:'product_total_price')
         self.product_total_price = attributes[:'product_total_price']
       end
 
-      if attributes.has_key?(:'delivery_total_charge')
+      if attributes.key?(:'delivery_total_charge')
         self.delivery_total_charge = attributes[:'delivery_total_charge']
       end
 
-      if attributes.has_key?(:'fee')
+      if attributes.key?(:'fee')
         self.fee = attributes[:'fee']
       end
 
-      if attributes.has_key?(:'tax')
+      if attributes.key?(:'tax')
         self.tax = attributes[:'tax']
       end
 
-      if attributes.has_key?(:'noshi_total_charge')
+      if attributes.key?(:'noshi_total_charge')
         self.noshi_total_charge = attributes[:'noshi_total_charge']
       end
 
-      if attributes.has_key?(:'card_total_charge')
+      if attributes.key?(:'card_total_charge')
         self.card_total_charge = attributes[:'card_total_charge']
       end
 
-      if attributes.has_key?(:'wrapping_total_charge')
+      if attributes.key?(:'wrapping_total_charge')
         self.wrapping_total_charge = attributes[:'wrapping_total_charge']
       end
 
-      if attributes.has_key?(:'point_discount')
+      if attributes.key?(:'point_discount')
         self.point_discount = attributes[:'point_discount']
       end
 
-      if attributes.has_key?(:'gmo_point_discount')
+      if attributes.key?(:'gmo_point_discount')
         self.gmo_point_discount = attributes[:'gmo_point_discount']
       end
 
-      if attributes.has_key?(:'other_discount')
+      if attributes.key?(:'other_discount')
         self.other_discount = attributes[:'other_discount']
       end
 
-      if attributes.has_key?(:'other_discount_name')
+      if attributes.key?(:'other_discount_name')
         self.other_discount_name = attributes[:'other_discount_name']
       end
 
-      if attributes.has_key?(:'total_price')
+      if attributes.key?(:'total_price')
         self.total_price = attributes[:'total_price']
       end
 
-      if attributes.has_key?(:'granted_points')
+      if attributes.key?(:'granted_points')
         self.granted_points = attributes[:'granted_points']
       end
 
-      if attributes.has_key?(:'use_points')
+      if attributes.key?(:'use_points')
         self.use_points = attributes[:'use_points']
       end
 
-      if attributes.has_key?(:'granted_gmo_points')
+      if attributes.key?(:'granted_gmo_points')
         self.granted_gmo_points = attributes[:'granted_gmo_points']
       end
 
-      if attributes.has_key?(:'use_gmo_points')
+      if attributes.key?(:'use_gmo_points')
         self.use_gmo_points = attributes[:'use_gmo_points']
       end
 
-      if attributes.has_key?(:'granted_yahoo_points')
+      if attributes.key?(:'granted_yahoo_points')
         self.granted_yahoo_points = attributes[:'granted_yahoo_points']
       end
 
-      if attributes.has_key?(:'use_yahoo_points')
+      if attributes.key?(:'use_yahoo_points')
         self.use_yahoo_points = attributes[:'use_yahoo_points']
       end
 
-      if attributes.has_key?(:'customer')
+      if attributes.key?(:'external_order_id')
+        self.external_order_id = attributes[:'external_order_id']
+      end
+
+      if attributes.key?(:'customer')
         self.customer = attributes[:'customer']
       end
 
-      if attributes.has_key?(:'details')
+      if attributes.key?(:'details')
         if (value = attributes[:'details']).is_a?(Array)
           self.details = value
         end
       end
 
-      if attributes.has_key?(:'sale_deliveries')
+      if attributes.key?(:'sale_deliveries')
         if (value = attributes[:'sale_deliveries']).is_a?(Array)
           self.sale_deliveries = value
         end
+      end
+
+      if attributes.key?(:'segment')
+        self.segment = attributes[:'segment']
+      end
+
+      if attributes.key?(:'totals')
+        self.totals = attributes[:'totals']
       end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
     # @return Array for valid properties with the reasons
     def list_invalid_properties
+      warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
       invalid_properties
     end
@@ -428,17 +481,18 @@ module ColorMeShop
     # Check to see if the all the properties in the model are valid
     # @return true if the model is valid
     def valid?
-      accepted_mail_state_validator = EnumAttributeValidator.new('String', ['not_yet', 'sent', 'pass'])
+      warn '[DEPRECATED] the `valid?` method is obsolete'
+      accepted_mail_state_validator = EnumAttributeValidator.new('String', ["not_yet", "sent", "pass"])
       return false unless accepted_mail_state_validator.valid?(@accepted_mail_state)
-      paid_mail_state_validator = EnumAttributeValidator.new('String', ['not_yet', 'sent', 'pass'])
+      paid_mail_state_validator = EnumAttributeValidator.new('String', ["not_yet", "sent", "pass"])
       return false unless paid_mail_state_validator.valid?(@paid_mail_state)
-      delivered_mail_state_validator = EnumAttributeValidator.new('String', ['not_yet', 'sent', 'pass'])
+      delivered_mail_state_validator = EnumAttributeValidator.new('String', ["not_yet", "sent", "pass"])
       return false unless delivered_mail_state_validator.valid?(@delivered_mail_state)
-      point_state_validator = EnumAttributeValidator.new('String', ['assumed', 'fixed', 'canceled'])
+      point_state_validator = EnumAttributeValidator.new('String', ["assumed", "fixed", "canceled"])
       return false unless point_state_validator.valid?(@point_state)
-      gmo_point_state_validator = EnumAttributeValidator.new('String', ['assumed', 'fixed', 'canceled'])
+      gmo_point_state_validator = EnumAttributeValidator.new('String', ["assumed", "fixed", "canceled"])
       return false unless gmo_point_state_validator.valid?(@gmo_point_state)
-      yahoo_point_state_validator = EnumAttributeValidator.new('String', ['assumed', 'fixed', 'canceled'])
+      yahoo_point_state_validator = EnumAttributeValidator.new('String', ["assumed", "fixed", "canceled"])
       return false unless yahoo_point_state_validator.valid?(@yahoo_point_state)
       true
     end
@@ -446,9 +500,9 @@ module ColorMeShop
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] accepted_mail_state Object to be assigned
     def accepted_mail_state=(accepted_mail_state)
-      validator = EnumAttributeValidator.new('String', ['not_yet', 'sent', 'pass'])
+      validator = EnumAttributeValidator.new('String', ["not_yet", "sent", "pass"])
       unless validator.valid?(accepted_mail_state)
-        fail ArgumentError, 'invalid value for "accepted_mail_state", must be one of #{validator.allowable_values}.'
+        fail ArgumentError, "invalid value for \"accepted_mail_state\", must be one of #{validator.allowable_values}."
       end
       @accepted_mail_state = accepted_mail_state
     end
@@ -456,9 +510,9 @@ module ColorMeShop
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] paid_mail_state Object to be assigned
     def paid_mail_state=(paid_mail_state)
-      validator = EnumAttributeValidator.new('String', ['not_yet', 'sent', 'pass'])
+      validator = EnumAttributeValidator.new('String', ["not_yet", "sent", "pass"])
       unless validator.valid?(paid_mail_state)
-        fail ArgumentError, 'invalid value for "paid_mail_state", must be one of #{validator.allowable_values}.'
+        fail ArgumentError, "invalid value for \"paid_mail_state\", must be one of #{validator.allowable_values}."
       end
       @paid_mail_state = paid_mail_state
     end
@@ -466,9 +520,9 @@ module ColorMeShop
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] delivered_mail_state Object to be assigned
     def delivered_mail_state=(delivered_mail_state)
-      validator = EnumAttributeValidator.new('String', ['not_yet', 'sent', 'pass'])
+      validator = EnumAttributeValidator.new('String', ["not_yet", "sent", "pass"])
       unless validator.valid?(delivered_mail_state)
-        fail ArgumentError, 'invalid value for "delivered_mail_state", must be one of #{validator.allowable_values}.'
+        fail ArgumentError, "invalid value for \"delivered_mail_state\", must be one of #{validator.allowable_values}."
       end
       @delivered_mail_state = delivered_mail_state
     end
@@ -476,9 +530,9 @@ module ColorMeShop
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] point_state Object to be assigned
     def point_state=(point_state)
-      validator = EnumAttributeValidator.new('String', ['assumed', 'fixed', 'canceled'])
+      validator = EnumAttributeValidator.new('String', ["assumed", "fixed", "canceled"])
       unless validator.valid?(point_state)
-        fail ArgumentError, 'invalid value for "point_state", must be one of #{validator.allowable_values}.'
+        fail ArgumentError, "invalid value for \"point_state\", must be one of #{validator.allowable_values}."
       end
       @point_state = point_state
     end
@@ -486,9 +540,9 @@ module ColorMeShop
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] gmo_point_state Object to be assigned
     def gmo_point_state=(gmo_point_state)
-      validator = EnumAttributeValidator.new('String', ['assumed', 'fixed', 'canceled'])
+      validator = EnumAttributeValidator.new('String', ["assumed", "fixed", "canceled"])
       unless validator.valid?(gmo_point_state)
-        fail ArgumentError, 'invalid value for "gmo_point_state", must be one of #{validator.allowable_values}.'
+        fail ArgumentError, "invalid value for \"gmo_point_state\", must be one of #{validator.allowable_values}."
       end
       @gmo_point_state = gmo_point_state
     end
@@ -496,9 +550,9 @@ module ColorMeShop
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] yahoo_point_state Object to be assigned
     def yahoo_point_state=(yahoo_point_state)
-      validator = EnumAttributeValidator.new('String', ['assumed', 'fixed', 'canceled'])
+      validator = EnumAttributeValidator.new('String', ["assumed", "fixed", "canceled"])
       unless validator.valid?(yahoo_point_state)
-        fail ArgumentError, 'invalid value for "yahoo_point_state", must be one of #{validator.allowable_values}.'
+        fail ArgumentError, "invalid value for \"yahoo_point_state\", must be one of #{validator.allowable_values}."
       end
       @yahoo_point_state = yahoo_point_state
     end
@@ -545,9 +599,12 @@ module ColorMeShop
           use_gmo_points == o.use_gmo_points &&
           granted_yahoo_points == o.granted_yahoo_points &&
           use_yahoo_points == o.use_yahoo_points &&
+          external_order_id == o.external_order_id &&
           customer == o.customer &&
           details == o.details &&
-          sale_deliveries == o.sale_deliveries
+          sale_deliveries == o.sale_deliveries &&
+          segment == o.segment &&
+          totals == o.totals
     end
 
     # @see the `==` method
@@ -557,39 +614,42 @@ module ColorMeShop
     end
 
     # Calculates hash code according to all attributes.
-    # @return [Fixnum] Hash code
+    # @return [Integer] Hash code
     def hash
-      [id, account_id, make_date, update_date, memo, payment_id, mobile, paid, delivered, canceled, accepted_mail_state, paid_mail_state, delivered_mail_state, accepted_mail_sent_date, paid_mail_sent_date, delivered_mail_sent_date, point_state, gmo_point_state, yahoo_point_state, product_total_price, delivery_total_charge, fee, tax, noshi_total_charge, card_total_charge, wrapping_total_charge, point_discount, gmo_point_discount, other_discount, other_discount_name, total_price, granted_points, use_points, granted_gmo_points, use_gmo_points, granted_yahoo_points, use_yahoo_points, customer, details, sale_deliveries].hash
+      [id, account_id, make_date, update_date, memo, payment_id, mobile, paid, delivered, canceled, accepted_mail_state, paid_mail_state, delivered_mail_state, accepted_mail_sent_date, paid_mail_sent_date, delivered_mail_sent_date, point_state, gmo_point_state, yahoo_point_state, product_total_price, delivery_total_charge, fee, tax, noshi_total_charge, card_total_charge, wrapping_total_charge, point_discount, gmo_point_discount, other_discount, other_discount_name, total_price, granted_points, use_points, granted_gmo_points, use_gmo_points, granted_yahoo_points, use_yahoo_points, external_order_id, customer, details, sale_deliveries, segment, totals].hash
     end
 
     # Builds the object from hash
     # @param [Hash] attributes Model attributes in the form of hash
     # @return [Object] Returns the model itself
-    def build_from_hash(attributes)
+    def self.build_from_hash(attributes)
       return nil unless attributes.is_a?(Hash)
-      self.class.openapi_types.each_pair do |key, type|
-        if type =~ /\AArray<(.*)>/i
-          # check to ensure the input is an array given that the the attribute
+      attributes = attributes.transform_keys(&:to_sym)
+      transformed_hash = {}
+      openapi_types.each_pair do |key, type|
+        if attributes.key?(attribute_map[key]) && attributes[attribute_map[key]].nil?
+          transformed_hash["#{key}"] = nil
+        elsif type =~ /\AArray<(.*)>/i
+          # check to ensure the input is an array given that the attribute
           # is documented as an array but the input is not
-          if attributes[self.class.attribute_map[key]].is_a?(Array)
-            self.send("#{key}=", attributes[self.class.attribute_map[key]].map { |v| _deserialize($1, v) })
+          if attributes[attribute_map[key]].is_a?(Array)
+            transformed_hash["#{key}"] = attributes[attribute_map[key]].map { |v| _deserialize($1, v) }
           end
-        elsif !attributes[self.class.attribute_map[key]].nil?
-          self.send("#{key}=", _deserialize(type, attributes[self.class.attribute_map[key]]))
-        end # or else data not found in attributes(hash), not an issue as the data can be optional
+        elsif !attributes[attribute_map[key]].nil?
+          transformed_hash["#{key}"] = _deserialize(type, attributes[attribute_map[key]])
+        end
       end
-
-      self
+      new(transformed_hash)
     end
 
     # Deserializes the data based on type
     # @param string type Data type
     # @param string value Value to be deserialized
     # @return [Object] Deserialized data
-    def _deserialize(type, value)
+    def self._deserialize(type, value)
       case type.to_sym
-      when :DateTime
-        DateTime.parse(value)
+      when :Time
+        Time.parse(value)
       when :Date
         Date.parse(value)
       when :String
@@ -598,7 +658,7 @@ module ColorMeShop
         value.to_i
       when :Float
         value.to_f
-      when :BOOLEAN
+      when :Boolean
         if value.to_s =~ /\A(true|t|yes|y|1)\z/i
           true
         else
@@ -619,8 +679,9 @@ module ColorMeShop
           end
         end
       else # model
-        temp_model = ColorMeShop.const_get(type).new
-        temp_model.build_from_hash(value)
+        # models (e.g. Pet) or oneOf
+        klass = ColorMeShop.const_get(type)
+        klass.respond_to?(:openapi_any_of) || klass.respond_to?(:openapi_one_of) ? klass.build(value) : klass.build_from_hash(value)
       end
     end
 
@@ -642,7 +703,11 @@ module ColorMeShop
       hash = {}
       self.class.attribute_map.each_pair do |attr, param|
         value = self.send(attr)
-        next if value.nil?
+        if value.nil?
+          is_nullable = self.class.openapi_nullable.include?(attr)
+          next if !is_nullable || (is_nullable && !instance_variable_defined?(:"@#{attr}"))
+        end
+
         hash[param] = _to_hash(value)
       end
       hash
@@ -665,5 +730,7 @@ module ColorMeShop
         value
       end
     end
+
   end
+
 end

@@ -1,16 +1,17 @@
 =begin
 #カラーミーショップ API
 
-## カラーミーショップ API  [カラーミーショップ](https://shop-pro.jp) APIでは、受注の検索や商品情報の更新を行うことができます。  ## 利用手順  はじめに、カラーミーデベロッパーアカウントを用意します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。  次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリケーション登録を行ってください。 スマートフォンのWebViewを利用する場合は、リダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を入力してください。  その後、カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。  |パラメータ名|値| |---|---| |`client_id`|アプリケーション詳細画面で確認できるクライアントID| |`response_type`|\"code\"という文字列| |`scope`| 別表参照| |`redirect_url`|アプリケーション登録時に入力したリダイレクトURL|  `scope`は、以下のうち、アプリケーションが利用したい機能をスペース区切りで指定してください。  |スコープ|機能| |---|---| |`read_products`|商品データの参照| |`write_products`|在庫データの更新| |`read_sales`|受注・顧客データの参照| |`write_sales`|受注データの更新|  以下のようなURLとなります。  ``` https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URL&response_type=code&scope=read_products%20write_products ```  初めてこのページを訪れる場合は、カラーミーショップアカウントのIDとパスワードの入力を求められます。 承認ボタンを押すと、このアプリケーションがショップのデータにアクセスすることが許可され、リダイレクトURLへリダイレクトされます。  承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、 `error`パラメータにエラーの内容を表す文字列が与えられます。  アプリケーション登録時のリダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされます。 末尾のパスが認可コードになっています。  ``` https://api.shop-pro.jp/oauth/authorize/AUTH_CODE ```  認可コードの有効期限は発行から10分間です。  最後に、認可コードとアクセストークンを交換します。以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。  |パラメータ名|値| |---|---| |`client_id`|アプリケーション詳細画面に表示されているクライアントID| |`client_secret`|アプリケーション詳細画面に表示されているクライアントシークレット| |`code`|取得した認可コード| |`grant_type`|\"authorization_code\"という文字列| |`redirect_uri`|アプリケーション登録時に入力したリダイレクトURL|  ```console # curl での例  $ curl -X POST \\   -d'client_id=CLIENT_ID' \\   -d'client_secret=CLIENT_SECRET' \\   -d'code=CODE' \\   -d'grant_type=authorization_code'   \\   -d'redirect_uri=REDIRECT_URI'  \\   'https://api.shop-pro.jp/oauth/token' ```  リクエストが成功すると、以下のようなJSONが返ってきます。  ```json {   \"access_token\": \"d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX\",   \"token_type\": \"bearer\",   \"scope\": \"read_products write_products\" } ```  アクセストークンに有効期限はありませんが、許可済みアプリケーション一覧画面から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。  取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する際の例を示します。  ```console # curlの例  $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json ```  ## エラー  カラーミーショップAPI v1では  - エラーコード - エラーメッセージ - ステータスコード  の配列でエラーを表現します。以下に例を示します。  ```json {   \"errors\": [     {       \"code\": 404100,       \"message\": \"レコードが見つかりませんでした。\",       \"status\": 404     }   ] } ``` 
+## カラーミーショップ API  ## 利用手順  ### OAuthアプリケーションの登録  デベロッパーアカウントをお持ちでない場合は作成します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。  次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリ登録を行ってください。 スマートフォンのWebViewを利用する場合は、リダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を入力してください。  ### 認可  カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。  |パラメータ名|値| |---|---| |`client_id`|アプリ詳細画面で確認できるクライアントID| |`response_type`|\"code\"を指定| |`scope`| 別表参照| |`redirect_uri`|アプリ登録時に入力したリダイレクトURI|  `scope`は、以下のうち、アプリが利用したい機能をスペース区切りで指定してください。  |スコープ|機能| |---|---| |`read_products`|商品データの参照| |`write_products`|在庫データの更新| |`read_sales`|受注・顧客データの参照| |`write_sales`|受注データの更新| |`read_shop_coupons`|ショップクーポンの参照|  以下のようなURLとなります。  ``` https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&response_type=code&scope=read_products%20write_products ```  初めてこのページを訪れる場合は、カラーミーショップアカウントのログインIDとパスワードの入力を求められます。  ログイン後の認証ページでアプリとの連携が承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、 `error`パラメータにエラーの内容を表す文字列が与えられます。  アプリ登録時のリダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされ、 認可コードがURLの末尾に付与されます。  ``` https://api.shop-pro.jp/oauth/authorize/AUTH_CODE ```  認可コードの有効期限は発行から10分間です。  ### 認可コードをアクセストークンに交換  以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。  |パラメータ名|値| |---|---| |`client_id`|アプリ詳細画面に表示されているクライアントID| |`client_secret`|アプリ詳細画面に表示されているクライアントシークレット| |`code`|取得した認可コード| |`grant_type`|\"authorization_code\"を指定| |`redirect_uri`|アプリ登録時に入力したリダイレクトURI|  curlによるリクエストの例を以下に示します。 ```console $ curl -X POST \\   -d'client_id=CLIENT_ID' \\   -d'client_secret=CLIENT_SECRET' \\   -d'code=CODE' \\   -d'grant_type=authorization_code'   \\   -d'redirect_uri=REDIRECT_URI'  \\   'https://api.shop-pro.jp/oauth/token' ```  リクエストが成功すると、以下のようなJSONが返却されます  ```json {   \"access_token\": \"d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX\",   \"token_type\": \"bearer\",   \"scope\": \"read_products write_products\" } ```  アクセストークンに有効期限はありませんが、[許可済みアプリ一覧画面](https://admin.shop-pro.jp/?mode=app_use_lst)から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。  ### APIの利用  取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する例を示します。  ```console $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json ```  ## エラー  カラーミーショップAPIでは、以下の形式の配列でエラーを表現します。  - `code` エラーコード - `message` エラーメッセージ - `status` ステータスコード  ```json {   \"errors\": [     {       \"code\": 404100,       \"message\": \"レコードが見つかりませんでした。\",       \"status\": 404     }   ] } ```  ## 都道府県コードについて APIを利用して都道府県コードを更新したり、レスポンスを参照される際には以下の表を参考にしてください。  <details>   <summary>都道府県コード一覧</summary>    |id|都道府県|   |---|---|   |1|北海道|   |2|青森県|   |3|岩手県|   |4|秋田県|   |5|宮城県|   |6|山形県|   |7|福島県|   |8|茨城県|   |9|栃木県|   |10|群馬県|   |11|埼玉県|   |12|千葉県|   |13|東京都|   |14|神奈川県|   |15|新潟県|   |16|福井県|   |17|石川県|   |18|富山県|   |19|静岡県|   |20|山梨県|   |21|長野県|   |22|愛知県|   |23|岐阜県|   |24|三重県|   |25|和歌山県|   |26|滋賀県|   |27|奈良県|   |28|京都府|   |29|大阪府|   |30|兵庫県|   |31|岡山県|   |32|広島県|   |33|鳥取県|   |34|島根県|   |35|山口県|   |36|香川県|   |37|徳島県|   |38|愛媛県|   |39|高知県|   |40|福岡県|   |41|佐賀県|   |42|長崎県|   |43|大分県|   |44|熊本県|   |45|宮崎県|   |46|鹿児島県|   |47|沖縄県|   |48|海外|  </details> 
 
-OpenAPI spec version: 1.0.0
+The version of the OpenAPI document: 1.0.0
 
 Generated by: https://openapi-generator.tech
-OpenAPI Generator version: 3.2.0-SNAPSHOT
+OpenAPI Generator version: 7.2.0-SNAPSHOT
 
 =end
 
 require 'date'
+require 'time'
 
 module ColorMeShop
   class Delivery
@@ -22,6 +23,9 @@ module ColorMeShop
 
     # 配送方法名
     attr_accessor :name
+
+    # 配送方法区分  - `other`: そのほか - `yamato`: クロネコヤマト - `yamato_pickup`: ヤマト自宅外受け取り - `sagawa`: 佐川急便 - `jp`: 日本郵便 
+    attr_accessor :method_type
 
     # 配送方法画像URL
     attr_accessor :image_url
@@ -35,7 +39,6 @@ module ColorMeShop
     # 配送料の計算方法  - `fixed`: 固定額 - `by_price`: 注文金額によって決定 - `by_area`: 配送先都道府県によって決定 - `by_weight`: 商品重量によって決定 
     attr_accessor :charge_type
 
-    # 配送料設定の詳細。上記の`charge_free_type`や`charge_type`に基づいて、この中から配送料が決定される
     attr_accessor :charge
 
     # 送料が税込み料金であるか否か
@@ -64,6 +67,9 @@ module ColorMeShop
 
     # 配送時間帯を指定可能か
     attr_accessor :preferred_period_use
+
+    # 利用不可決済方法の配列
+    attr_accessor :unavailable_payment_ids
 
     # 配送方法作成日時
     attr_accessor :make_date
@@ -99,6 +105,7 @@ module ColorMeShop
         :'id' => :'id',
         :'account_id' => :'account_id',
         :'name' => :'name',
+        :'method_type' => :'method_type',
         :'image_url' => :'image_url',
         :'charge_free_type' => :'charge_free_type',
         :'charge_free_limit' => :'charge_free_limit',
@@ -113,9 +120,15 @@ module ColorMeShop
         :'display_state' => :'display_state',
         :'preferred_date_use' => :'preferred_date_use',
         :'preferred_period_use' => :'preferred_period_use',
+        :'unavailable_payment_ids' => :'unavailable_payment_ids',
         :'make_date' => :'make_date',
         :'update_date' => :'update_date'
       }
+    end
+
+    # Returns all the JSON keys this model knows about
+    def self.acceptable_attributes
+      attribute_map.values
     end
 
     # Attribute type mapping.
@@ -124,106 +137,137 @@ module ColorMeShop
         :'id' => :'Integer',
         :'account_id' => :'String',
         :'name' => :'String',
+        :'method_type' => :'String',
         :'image_url' => :'String',
         :'charge_free_type' => :'String',
         :'charge_free_limit' => :'Integer',
         :'charge_type' => :'String',
-        :'charge' => :'Object',
-        :'tax_included' => :'BOOLEAN',
-        :'slip_number_use' => :'BOOLEAN',
+        :'charge' => :'GetDeliveries200ResponseDeliveriesInnerCharge',
+        :'tax_included' => :'Boolean',
+        :'slip_number_use' => :'Boolean',
         :'slip_number_url' => :'String',
         :'memo' => :'String',
         :'memo2' => :'String',
         :'sort' => :'Integer',
         :'display_state' => :'String',
-        :'preferred_date_use' => :'BOOLEAN',
-        :'preferred_period_use' => :'BOOLEAN',
+        :'preferred_date_use' => :'Boolean',
+        :'preferred_period_use' => :'Boolean',
+        :'unavailable_payment_ids' => :'Array<Integer>',
         :'make_date' => :'Integer',
         :'update_date' => :'Integer'
       }
     end
 
+    # List of attributes with nullable: true
+    def self.openapi_nullable
+      Set.new([
+        :'image_url',
+        :'charge_free_limit',
+        :'slip_number_url',
+        :'memo',
+        :'memo2',
+        :'sort',
+      ])
+    end
+
     # Initializes the object
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
-      return unless attributes.is_a?(Hash)
+      if (!attributes.is_a?(Hash))
+        fail ArgumentError, "The input argument (attributes) must be a hash in `ColorMeShop::Delivery` initialize method"
+      end
 
-      # convert string to symbol for hash key
-      attributes = attributes.each_with_object({}) { |(k, v), h| h[k.to_sym] = v }
+      # check to see if the attribute exists and convert string to symbol for hash key
+      attributes = attributes.each_with_object({}) { |(k, v), h|
+        if (!self.class.attribute_map.key?(k.to_sym))
+          fail ArgumentError, "`#{k}` is not a valid attribute in `ColorMeShop::Delivery`. Please check the name to make sure it's valid. List of attributes: " + self.class.attribute_map.keys.inspect
+        end
+        h[k.to_sym] = v
+      }
 
-      if attributes.has_key?(:'id')
+      if attributes.key?(:'id')
         self.id = attributes[:'id']
       end
 
-      if attributes.has_key?(:'account_id')
+      if attributes.key?(:'account_id')
         self.account_id = attributes[:'account_id']
       end
 
-      if attributes.has_key?(:'name')
+      if attributes.key?(:'name')
         self.name = attributes[:'name']
       end
 
-      if attributes.has_key?(:'image_url')
+      if attributes.key?(:'method_type')
+        self.method_type = attributes[:'method_type']
+      end
+
+      if attributes.key?(:'image_url')
         self.image_url = attributes[:'image_url']
       end
 
-      if attributes.has_key?(:'charge_free_type')
+      if attributes.key?(:'charge_free_type')
         self.charge_free_type = attributes[:'charge_free_type']
       end
 
-      if attributes.has_key?(:'charge_free_limit')
+      if attributes.key?(:'charge_free_limit')
         self.charge_free_limit = attributes[:'charge_free_limit']
       end
 
-      if attributes.has_key?(:'charge_type')
+      if attributes.key?(:'charge_type')
         self.charge_type = attributes[:'charge_type']
       end
 
-      if attributes.has_key?(:'charge')
+      if attributes.key?(:'charge')
         self.charge = attributes[:'charge']
       end
 
-      if attributes.has_key?(:'tax_included')
+      if attributes.key?(:'tax_included')
         self.tax_included = attributes[:'tax_included']
       end
 
-      if attributes.has_key?(:'slip_number_use')
+      if attributes.key?(:'slip_number_use')
         self.slip_number_use = attributes[:'slip_number_use']
       end
 
-      if attributes.has_key?(:'slip_number_url')
+      if attributes.key?(:'slip_number_url')
         self.slip_number_url = attributes[:'slip_number_url']
       end
 
-      if attributes.has_key?(:'memo')
+      if attributes.key?(:'memo')
         self.memo = attributes[:'memo']
       end
 
-      if attributes.has_key?(:'memo2')
+      if attributes.key?(:'memo2')
         self.memo2 = attributes[:'memo2']
       end
 
-      if attributes.has_key?(:'sort')
+      if attributes.key?(:'sort')
         self.sort = attributes[:'sort']
       end
 
-      if attributes.has_key?(:'display_state')
+      if attributes.key?(:'display_state')
         self.display_state = attributes[:'display_state']
       end
 
-      if attributes.has_key?(:'preferred_date_use')
+      if attributes.key?(:'preferred_date_use')
         self.preferred_date_use = attributes[:'preferred_date_use']
       end
 
-      if attributes.has_key?(:'preferred_period_use')
+      if attributes.key?(:'preferred_period_use')
         self.preferred_period_use = attributes[:'preferred_period_use']
       end
 
-      if attributes.has_key?(:'make_date')
+      if attributes.key?(:'unavailable_payment_ids')
+        if (value = attributes[:'unavailable_payment_ids']).is_a?(Array)
+          self.unavailable_payment_ids = value
+        end
+      end
+
+      if attributes.key?(:'make_date')
         self.make_date = attributes[:'make_date']
       end
 
-      if attributes.has_key?(:'update_date')
+      if attributes.key?(:'update_date')
         self.update_date = attributes[:'update_date']
       end
     end
@@ -231,6 +275,7 @@ module ColorMeShop
     # Show invalid properties with the reasons. Usually used together with valid?
     # @return Array for valid properties with the reasons
     def list_invalid_properties
+      warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
       invalid_properties
     end
@@ -238,21 +283,34 @@ module ColorMeShop
     # Check to see if the all the properties in the model are valid
     # @return true if the model is valid
     def valid?
-      charge_free_type_validator = EnumAttributeValidator.new('String', ['not_free', 'free', 'free_to_limit'])
+      warn '[DEPRECATED] the `valid?` method is obsolete'
+      method_type_validator = EnumAttributeValidator.new('String', ["other", "yamato", "yamato_pickup", "sagawa", "jp"])
+      return false unless method_type_validator.valid?(@method_type)
+      charge_free_type_validator = EnumAttributeValidator.new('String', ["not_free", "free", "free_to_limit"])
       return false unless charge_free_type_validator.valid?(@charge_free_type)
-      charge_type_validator = EnumAttributeValidator.new('String', ['fixed', 'by_price', 'by_area', 'by_weight'])
+      charge_type_validator = EnumAttributeValidator.new('String', ["fixed", "by_price", "by_area", "by_weight"])
       return false unless charge_type_validator.valid?(@charge_type)
-      display_state_validator = EnumAttributeValidator.new('String', ['showing', 'hidden'])
+      display_state_validator = EnumAttributeValidator.new('String', ["showing", "hidden"])
       return false unless display_state_validator.valid?(@display_state)
       true
     end
 
     # Custom attribute writer method checking allowed values (enum).
+    # @param [Object] method_type Object to be assigned
+    def method_type=(method_type)
+      validator = EnumAttributeValidator.new('String', ["other", "yamato", "yamato_pickup", "sagawa", "jp"])
+      unless validator.valid?(method_type)
+        fail ArgumentError, "invalid value for \"method_type\", must be one of #{validator.allowable_values}."
+      end
+      @method_type = method_type
+    end
+
+    # Custom attribute writer method checking allowed values (enum).
     # @param [Object] charge_free_type Object to be assigned
     def charge_free_type=(charge_free_type)
-      validator = EnumAttributeValidator.new('String', ['not_free', 'free', 'free_to_limit'])
+      validator = EnumAttributeValidator.new('String', ["not_free", "free", "free_to_limit"])
       unless validator.valid?(charge_free_type)
-        fail ArgumentError, 'invalid value for "charge_free_type", must be one of #{validator.allowable_values}.'
+        fail ArgumentError, "invalid value for \"charge_free_type\", must be one of #{validator.allowable_values}."
       end
       @charge_free_type = charge_free_type
     end
@@ -260,9 +318,9 @@ module ColorMeShop
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] charge_type Object to be assigned
     def charge_type=(charge_type)
-      validator = EnumAttributeValidator.new('String', ['fixed', 'by_price', 'by_area', 'by_weight'])
+      validator = EnumAttributeValidator.new('String', ["fixed", "by_price", "by_area", "by_weight"])
       unless validator.valid?(charge_type)
-        fail ArgumentError, 'invalid value for "charge_type", must be one of #{validator.allowable_values}.'
+        fail ArgumentError, "invalid value for \"charge_type\", must be one of #{validator.allowable_values}."
       end
       @charge_type = charge_type
     end
@@ -270,9 +328,9 @@ module ColorMeShop
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] display_state Object to be assigned
     def display_state=(display_state)
-      validator = EnumAttributeValidator.new('String', ['showing', 'hidden'])
+      validator = EnumAttributeValidator.new('String', ["showing", "hidden"])
       unless validator.valid?(display_state)
-        fail ArgumentError, 'invalid value for "display_state", must be one of #{validator.allowable_values}.'
+        fail ArgumentError, "invalid value for \"display_state\", must be one of #{validator.allowable_values}."
       end
       @display_state = display_state
     end
@@ -285,6 +343,7 @@ module ColorMeShop
           id == o.id &&
           account_id == o.account_id &&
           name == o.name &&
+          method_type == o.method_type &&
           image_url == o.image_url &&
           charge_free_type == o.charge_free_type &&
           charge_free_limit == o.charge_free_limit &&
@@ -299,6 +358,7 @@ module ColorMeShop
           display_state == o.display_state &&
           preferred_date_use == o.preferred_date_use &&
           preferred_period_use == o.preferred_period_use &&
+          unavailable_payment_ids == o.unavailable_payment_ids &&
           make_date == o.make_date &&
           update_date == o.update_date
     end
@@ -310,39 +370,42 @@ module ColorMeShop
     end
 
     # Calculates hash code according to all attributes.
-    # @return [Fixnum] Hash code
+    # @return [Integer] Hash code
     def hash
-      [id, account_id, name, image_url, charge_free_type, charge_free_limit, charge_type, charge, tax_included, slip_number_use, slip_number_url, memo, memo2, sort, display_state, preferred_date_use, preferred_period_use, make_date, update_date].hash
+      [id, account_id, name, method_type, image_url, charge_free_type, charge_free_limit, charge_type, charge, tax_included, slip_number_use, slip_number_url, memo, memo2, sort, display_state, preferred_date_use, preferred_period_use, unavailable_payment_ids, make_date, update_date].hash
     end
 
     # Builds the object from hash
     # @param [Hash] attributes Model attributes in the form of hash
     # @return [Object] Returns the model itself
-    def build_from_hash(attributes)
+    def self.build_from_hash(attributes)
       return nil unless attributes.is_a?(Hash)
-      self.class.openapi_types.each_pair do |key, type|
-        if type =~ /\AArray<(.*)>/i
-          # check to ensure the input is an array given that the the attribute
+      attributes = attributes.transform_keys(&:to_sym)
+      transformed_hash = {}
+      openapi_types.each_pair do |key, type|
+        if attributes.key?(attribute_map[key]) && attributes[attribute_map[key]].nil?
+          transformed_hash["#{key}"] = nil
+        elsif type =~ /\AArray<(.*)>/i
+          # check to ensure the input is an array given that the attribute
           # is documented as an array but the input is not
-          if attributes[self.class.attribute_map[key]].is_a?(Array)
-            self.send("#{key}=", attributes[self.class.attribute_map[key]].map { |v| _deserialize($1, v) })
+          if attributes[attribute_map[key]].is_a?(Array)
+            transformed_hash["#{key}"] = attributes[attribute_map[key]].map { |v| _deserialize($1, v) }
           end
-        elsif !attributes[self.class.attribute_map[key]].nil?
-          self.send("#{key}=", _deserialize(type, attributes[self.class.attribute_map[key]]))
-        end # or else data not found in attributes(hash), not an issue as the data can be optional
+        elsif !attributes[attribute_map[key]].nil?
+          transformed_hash["#{key}"] = _deserialize(type, attributes[attribute_map[key]])
+        end
       end
-
-      self
+      new(transformed_hash)
     end
 
     # Deserializes the data based on type
     # @param string type Data type
     # @param string value Value to be deserialized
     # @return [Object] Deserialized data
-    def _deserialize(type, value)
+    def self._deserialize(type, value)
       case type.to_sym
-      when :DateTime
-        DateTime.parse(value)
+      when :Time
+        Time.parse(value)
       when :Date
         Date.parse(value)
       when :String
@@ -351,7 +414,7 @@ module ColorMeShop
         value.to_i
       when :Float
         value.to_f
-      when :BOOLEAN
+      when :Boolean
         if value.to_s =~ /\A(true|t|yes|y|1)\z/i
           true
         else
@@ -372,8 +435,9 @@ module ColorMeShop
           end
         end
       else # model
-        temp_model = ColorMeShop.const_get(type).new
-        temp_model.build_from_hash(value)
+        # models (e.g. Pet) or oneOf
+        klass = ColorMeShop.const_get(type)
+        klass.respond_to?(:openapi_any_of) || klass.respond_to?(:openapi_one_of) ? klass.build(value) : klass.build_from_hash(value)
       end
     end
 
@@ -395,7 +459,11 @@ module ColorMeShop
       hash = {}
       self.class.attribute_map.each_pair do |attr, param|
         value = self.send(attr)
-        next if value.nil?
+        if value.nil?
+          is_nullable = self.class.openapi_nullable.include?(attr)
+          next if !is_nullable || (is_nullable && !instance_variable_defined?(:"@#{attr}"))
+        end
+
         hash[param] = _to_hash(value)
       end
       hash
@@ -418,5 +486,7 @@ module ColorMeShop
         value
       end
     end
+
   end
+
 end

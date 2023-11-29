@@ -1,16 +1,16 @@
 =begin
 #カラーミーショップ API
 
-## カラーミーショップ API  [カラーミーショップ](https://shop-pro.jp) APIでは、受注の検索や商品情報の更新を行うことができます。  ## 利用手順  はじめに、カラーミーデベロッパーアカウントを用意します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。  次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリケーション登録を行ってください。 スマートフォンのWebViewを利用する場合は、リダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を入力してください。  その後、カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。  |パラメータ名|値| |---|---| |`client_id`|アプリケーション詳細画面で確認できるクライアントID| |`response_type`|\"code\"という文字列| |`scope`| 別表参照| |`redirect_url`|アプリケーション登録時に入力したリダイレクトURL|  `scope`は、以下のうち、アプリケーションが利用したい機能をスペース区切りで指定してください。  |スコープ|機能| |---|---| |`read_products`|商品データの参照| |`write_products`|在庫データの更新| |`read_sales`|受注・顧客データの参照| |`write_sales`|受注データの更新|  以下のようなURLとなります。  ``` https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URL&response_type=code&scope=read_products%20write_products ```  初めてこのページを訪れる場合は、カラーミーショップアカウントのIDとパスワードの入力を求められます。 承認ボタンを押すと、このアプリケーションがショップのデータにアクセスすることが許可され、リダイレクトURLへリダイレクトされます。  承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、 `error`パラメータにエラーの内容を表す文字列が与えられます。  アプリケーション登録時のリダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされます。 末尾のパスが認可コードになっています。  ``` https://api.shop-pro.jp/oauth/authorize/AUTH_CODE ```  認可コードの有効期限は発行から10分間です。  最後に、認可コードとアクセストークンを交換します。以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。  |パラメータ名|値| |---|---| |`client_id`|アプリケーション詳細画面に表示されているクライアントID| |`client_secret`|アプリケーション詳細画面に表示されているクライアントシークレット| |`code`|取得した認可コード| |`grant_type`|\"authorization_code\"という文字列| |`redirect_uri`|アプリケーション登録時に入力したリダイレクトURL|  ```console # curl での例  $ curl -X POST \\   -d'client_id=CLIENT_ID' \\   -d'client_secret=CLIENT_SECRET' \\   -d'code=CODE' \\   -d'grant_type=authorization_code'   \\   -d'redirect_uri=REDIRECT_URI'  \\   'https://api.shop-pro.jp/oauth/token' ```  リクエストが成功すると、以下のようなJSONが返ってきます。  ```json {   \"access_token\": \"d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX\",   \"token_type\": \"bearer\",   \"scope\": \"read_products write_products\" } ```  アクセストークンに有効期限はありませんが、許可済みアプリケーション一覧画面から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。  取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する際の例を示します。  ```console # curlの例  $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json ```  ## エラー  カラーミーショップAPI v1では  - エラーコード - エラーメッセージ - ステータスコード  の配列でエラーを表現します。以下に例を示します。  ```json {   \"errors\": [     {       \"code\": 404100,       \"message\": \"レコードが見つかりませんでした。\",       \"status\": 404     }   ] } ``` 
+## カラーミーショップ API  ## 利用手順  ### OAuthアプリケーションの登録  デベロッパーアカウントをお持ちでない場合は作成します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。  次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリ登録を行ってください。 スマートフォンのWebViewを利用する場合は、リダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を入力してください。  ### 認可  カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。  |パラメータ名|値| |---|---| |`client_id`|アプリ詳細画面で確認できるクライアントID| |`response_type`|\"code\"を指定| |`scope`| 別表参照| |`redirect_uri`|アプリ登録時に入力したリダイレクトURI|  `scope`は、以下のうち、アプリが利用したい機能をスペース区切りで指定してください。  |スコープ|機能| |---|---| |`read_products`|商品データの参照| |`write_products`|在庫データの更新| |`read_sales`|受注・顧客データの参照| |`write_sales`|受注データの更新| |`read_shop_coupons`|ショップクーポンの参照|  以下のようなURLとなります。  ``` https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&response_type=code&scope=read_products%20write_products ```  初めてこのページを訪れる場合は、カラーミーショップアカウントのログインIDとパスワードの入力を求められます。  ログイン後の認証ページでアプリとの連携が承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、 `error`パラメータにエラーの内容を表す文字列が与えられます。  アプリ登録時のリダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされ、 認可コードがURLの末尾に付与されます。  ``` https://api.shop-pro.jp/oauth/authorize/AUTH_CODE ```  認可コードの有効期限は発行から10分間です。  ### 認可コードをアクセストークンに交換  以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。  |パラメータ名|値| |---|---| |`client_id`|アプリ詳細画面に表示されているクライアントID| |`client_secret`|アプリ詳細画面に表示されているクライアントシークレット| |`code`|取得した認可コード| |`grant_type`|\"authorization_code\"を指定| |`redirect_uri`|アプリ登録時に入力したリダイレクトURI|  curlによるリクエストの例を以下に示します。 ```console $ curl -X POST \\   -d'client_id=CLIENT_ID' \\   -d'client_secret=CLIENT_SECRET' \\   -d'code=CODE' \\   -d'grant_type=authorization_code'   \\   -d'redirect_uri=REDIRECT_URI'  \\   'https://api.shop-pro.jp/oauth/token' ```  リクエストが成功すると、以下のようなJSONが返却されます  ```json {   \"access_token\": \"d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX\",   \"token_type\": \"bearer\",   \"scope\": \"read_products write_products\" } ```  アクセストークンに有効期限はありませんが、[許可済みアプリ一覧画面](https://admin.shop-pro.jp/?mode=app_use_lst)から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。  ### APIの利用  取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する例を示します。  ```console $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json ```  ## エラー  カラーミーショップAPIでは、以下の形式の配列でエラーを表現します。  - `code` エラーコード - `message` エラーメッセージ - `status` ステータスコード  ```json {   \"errors\": [     {       \"code\": 404100,       \"message\": \"レコードが見つかりませんでした。\",       \"status\": 404     }   ] } ```  ## 都道府県コードについて APIを利用して都道府県コードを更新したり、レスポンスを参照される際には以下の表を参考にしてください。  <details>   <summary>都道府県コード一覧</summary>    |id|都道府県|   |---|---|   |1|北海道|   |2|青森県|   |3|岩手県|   |4|秋田県|   |5|宮城県|   |6|山形県|   |7|福島県|   |8|茨城県|   |9|栃木県|   |10|群馬県|   |11|埼玉県|   |12|千葉県|   |13|東京都|   |14|神奈川県|   |15|新潟県|   |16|福井県|   |17|石川県|   |18|富山県|   |19|静岡県|   |20|山梨県|   |21|長野県|   |22|愛知県|   |23|岐阜県|   |24|三重県|   |25|和歌山県|   |26|滋賀県|   |27|奈良県|   |28|京都府|   |29|大阪府|   |30|兵庫県|   |31|岡山県|   |32|広島県|   |33|鳥取県|   |34|島根県|   |35|山口県|   |36|香川県|   |37|徳島県|   |38|愛媛県|   |39|高知県|   |40|福岡県|   |41|佐賀県|   |42|長崎県|   |43|大分県|   |44|熊本県|   |45|宮崎県|   |46|鹿児島県|   |47|沖縄県|   |48|海外|  </details> 
 
-OpenAPI spec version: 1.0.0
+The version of the OpenAPI document: 1.0.0
 
 Generated by: https://openapi-generator.tech
-OpenAPI Generator version: 3.2.0-SNAPSHOT
+OpenAPI Generator version: 7.2.0-SNAPSHOT
 
 =end
 
-require 'uri'
+require 'cgi'
 
 module ColorMeShop
   class CustomerApi
@@ -20,18 +20,20 @@ module ColorMeShop
       @api_client = api_client
     end
     # 顧客データの取得
-    # @param customer_id 
+    # 
+    # @param customer_id [Integer] 
     # @param [Hash] opts the optional parameters
-    # @return [Object]
+    # @return [GetCustomer200Response]
     def get_customer(customer_id, opts = {})
       data, _status_code, _headers = get_customer_with_http_info(customer_id, opts)
       data
     end
 
     # 顧客データの取得
-    # @param customer_id 
+    # 
+    # @param customer_id [Integer] 
     # @param [Hash] opts the optional parameters
-    # @return [Array<(Object, Fixnum, Hash)>] Object data, response status code and response headers
+    # @return [Array<(GetCustomer200Response, Integer, Hash)>] GetCustomer200Response data, response status code and response headers
     def get_customer_with_http_info(customer_id, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: CustomerApi.get_customer ...'
@@ -41,83 +43,110 @@ module ColorMeShop
         fail ArgumentError, "Missing the required parameter 'customer_id' when calling CustomerApi.get_customer"
       end
       # resource path
-      local_var_path = '/v1/customers/{customerId}.json'.sub('{' + 'customerId' + '}', customer_id.to_s)
+      local_var_path = '/v1/customers/{customer_id}'.sub('{' + 'customer_id' + '}', CGI.escape(customer_id.to_s))
 
       # query parameters
-      query_params = {}
+      query_params = opts[:query_params] || {}
 
       # header parameters
-      header_params = {}
+      header_params = opts[:header_params] || {}
       # HTTP header 'Accept' (if needed)
       header_params['Accept'] = @api_client.select_header_accept(['application/json'])
 
       # form parameters
-      form_params = {}
+      form_params = opts[:form_params] || {}
 
       # http body (model)
-      post_body = nil
-      auth_names = ['OAuth2']
-      data, status_code, headers = @api_client.call_api(:GET, local_var_path,
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'GetCustomer200Response'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['OAuth2']
+
+      new_options = opts.merge(
+        :operation => :"CustomerApi.get_customer",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
         :body => post_body,
         :auth_names => auth_names,
-        :return_type => 'Object')
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: CustomerApi#get_customer\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
+
     # 顧客データのリストを取得
+    # 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :ids 顧客IDで検索。カンマ区切りで複数指定可能
     # @option opts [String] :name 顧客名で部分一致検索
-    # @option opts [String] :furigana 顧客フリガナがで部分一致検索
+    # @option opts [String] :furigana 顧客フリガナで部分一致検索
     # @option opts [String] :mail 顧客メールアドレスで部分一致検索
     # @option opts [String] :postal 顧客の郵便番号で部分一致検索
     # @option opts [String] :tel 顧客の電話番号で部分一致検索
-    # @option opts [BOOLEAN] :mobile &#x60;true&#x60;なら会員登録済みの顧客から検索
+    # @option opts [String] :sex 顧客の性別で検索  - &#x60;male&#x60;: 男性 - &#x60;female&#x60;: 女性 
+    # @option opts [Boolean] :member &#x60;true&#x60;なら会員登録済みの顧客から検索
+    # @option opts [Boolean] :receive_mail_magazine メルマガ受信可否で検索
     # @option opts [String] :make_date_min 指定日時以降に登録された顧客から検索
     # @option opts [String] :make_date_max 指定日時以前に登録された顧客から検索
     # @option opts [String] :update_date_min 指定日時以降に更新された顧客から検索
-    # @option opts [String] :update_date_max 指定日時以降に更新された顧客から検索
-    # @return [Object]
+    # @option opts [String] :update_date_max 指定日時以前に更新された顧客から検索
+    # @option opts [Integer] :limit レスポンスの件数を指定。指定がない場合は10。最大100
+    # @option opts [Integer] :offset 指定した数値+1件目以降のデータを返す
+    # @return [GetCustomers200Response]
     def get_customers(opts = {})
       data, _status_code, _headers = get_customers_with_http_info(opts)
       data
     end
 
     # 顧客データのリストを取得
+    # 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :ids 顧客IDで検索。カンマ区切りで複数指定可能
     # @option opts [String] :name 顧客名で部分一致検索
-    # @option opts [String] :furigana 顧客フリガナがで部分一致検索
+    # @option opts [String] :furigana 顧客フリガナで部分一致検索
     # @option opts [String] :mail 顧客メールアドレスで部分一致検索
     # @option opts [String] :postal 顧客の郵便番号で部分一致検索
     # @option opts [String] :tel 顧客の電話番号で部分一致検索
-    # @option opts [BOOLEAN] :mobile &#x60;true&#x60;なら会員登録済みの顧客から検索
+    # @option opts [String] :sex 顧客の性別で検索  - &#x60;male&#x60;: 男性 - &#x60;female&#x60;: 女性 
+    # @option opts [Boolean] :member &#x60;true&#x60;なら会員登録済みの顧客から検索
+    # @option opts [Boolean] :receive_mail_magazine メルマガ受信可否で検索
     # @option opts [String] :make_date_min 指定日時以降に登録された顧客から検索
     # @option opts [String] :make_date_max 指定日時以前に登録された顧客から検索
     # @option opts [String] :update_date_min 指定日時以降に更新された顧客から検索
-    # @option opts [String] :update_date_max 指定日時以降に更新された顧客から検索
-    # @return [Array<(Object, Fixnum, Hash)>] Object data, response status code and response headers
+    # @option opts [String] :update_date_max 指定日時以前に更新された顧客から検索
+    # @option opts [Integer] :limit レスポンスの件数を指定。指定がない場合は10。最大100
+    # @option opts [Integer] :offset 指定した数値+1件目以降のデータを返す
+    # @return [Array<(GetCustomers200Response, Integer, Hash)>] GetCustomers200Response data, response status code and response headers
     def get_customers_with_http_info(opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: CustomerApi.get_customers ...'
       end
+      allowable_values = ["male", "female"]
+      if @api_client.config.client_side_validation && opts[:'sex'] && !allowable_values.include?(opts[:'sex'])
+        fail ArgumentError, "invalid value for \"sex\", must be one of #{allowable_values}"
+      end
       # resource path
-      local_var_path = '/v1/customers.json'
+      local_var_path = '/v1/customers'
 
       # query parameters
-      query_params = {}
+      query_params = opts[:query_params] || {}
       query_params[:'ids'] = opts[:'ids'] if !opts[:'ids'].nil?
       query_params[:'name'] = opts[:'name'] if !opts[:'name'].nil?
       query_params[:'furigana'] = opts[:'furigana'] if !opts[:'furigana'].nil?
       query_params[:'mail'] = opts[:'mail'] if !opts[:'mail'].nil?
       query_params[:'postal'] = opts[:'postal'] if !opts[:'postal'].nil?
       query_params[:'tel'] = opts[:'tel'] if !opts[:'tel'].nil?
-      query_params[:'mobile'] = opts[:'mobile'] if !opts[:'mobile'].nil?
+      query_params[:'sex'] = opts[:'sex'] if !opts[:'sex'].nil?
+      query_params[:'member'] = opts[:'member'] if !opts[:'member'].nil?
+      query_params[:'receive_mail_magazine'] = opts[:'receive_mail_magazine'] if !opts[:'receive_mail_magazine'].nil?
       query_params[:'make_date_min'] = opts[:'make_date_min'] if !opts[:'make_date_min'].nil?
       query_params[:'make_date_max'] = opts[:'make_date_max'] if !opts[:'make_date_max'].nil?
       query_params[:'update_date_min'] = opts[:'update_date_min'] if !opts[:'update_date_min'].nil?
@@ -126,75 +155,97 @@ module ColorMeShop
       query_params[:'offset'] = opts[:'offset'] if !opts[:'offset'].nil?
 
       # header parameters
-      header_params = {}
+      header_params = opts[:header_params] || {}
       # HTTP header 'Accept' (if needed)
       header_params['Accept'] = @api_client.select_header_accept(['application/json'])
 
       # form parameters
-      form_params = {}
+      form_params = opts[:form_params] || {}
 
       # http body (model)
-      post_body = nil
-      auth_names = ['OAuth2']
-      data, status_code, headers = @api_client.call_api(:GET, local_var_path,
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'GetCustomers200Response'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['OAuth2']
+
+      new_options = opts.merge(
+        :operation => :"CustomerApi.get_customers",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
         :body => post_body,
         :auth_names => auth_names,
-        :return_type => 'Object')
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: CustomerApi#get_customers\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
+
     # 顧客データを追加
-    # @param unknown_base_type 
+    # 
     # @param [Hash] opts the optional parameters
-    # @return [Object]
-    def post_customers(unknown_base_type, opts = {})
-      data, _status_code, _headers = post_customers_with_http_info(unknown_base_type, opts)
+    # @option opts [PostCustomersRequest] :post_customers_request 
+    # @return [PostCustomers200Response]
+    def post_customers(opts = {})
+      data, _status_code, _headers = post_customers_with_http_info(opts)
       data
     end
 
     # 顧客データを追加
-    # @param unknown_base_type 
+    # 
     # @param [Hash] opts the optional parameters
-    # @return [Array<(Object, Fixnum, Hash)>] Object data, response status code and response headers
-    def post_customers_with_http_info(unknown_base_type, opts = {})
+    # @option opts [PostCustomersRequest] :post_customers_request 
+    # @return [Array<(PostCustomers200Response, Integer, Hash)>] PostCustomers200Response data, response status code and response headers
+    def post_customers_with_http_info(opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: CustomerApi.post_customers ...'
       end
-      # verify the required parameter 'unknown_base_type' is set
-      if @api_client.config.client_side_validation && unknown_base_type.nil?
-        fail ArgumentError, "Missing the required parameter 'unknown_base_type' when calling CustomerApi.post_customers"
-      end
       # resource path
-      local_var_path = '/v1/customers.json'
+      local_var_path = '/v1/customers'
 
       # query parameters
-      query_params = {}
+      query_params = opts[:query_params] || {}
 
       # header parameters
-      header_params = {}
+      header_params = opts[:header_params] || {}
       # HTTP header 'Accept' (if needed)
       header_params['Accept'] = @api_client.select_header_accept(['application/json'])
       # HTTP header 'Content-Type'
-      header_params['Content-Type'] = @api_client.select_header_content_type(['application/json'])
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
 
       # form parameters
-      form_params = {}
+      form_params = opts[:form_params] || {}
 
       # http body (model)
-      post_body = @api_client.object_to_http_body(unknown_base_type)
-      auth_names = ['OAuth2']
-      data, status_code, headers = @api_client.call_api(:POST, local_var_path,
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(opts[:'post_customers_request'])
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'PostCustomers200Response'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['OAuth2']
+
+      new_options = opts.merge(
+        :operation => :"CustomerApi.post_customers",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
         :body => post_body,
         :auth_names => auth_names,
-        :return_type => 'Object')
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: CustomerApi#post_customers\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end

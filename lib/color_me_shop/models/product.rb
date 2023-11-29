@@ -1,16 +1,17 @@
 =begin
 #カラーミーショップ API
 
-## カラーミーショップ API  [カラーミーショップ](https://shop-pro.jp) APIでは、受注の検索や商品情報の更新を行うことができます。  ## 利用手順  はじめに、カラーミーデベロッパーアカウントを用意します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。  次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリケーション登録を行ってください。 スマートフォンのWebViewを利用する場合は、リダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を入力してください。  その後、カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。  |パラメータ名|値| |---|---| |`client_id`|アプリケーション詳細画面で確認できるクライアントID| |`response_type`|\"code\"という文字列| |`scope`| 別表参照| |`redirect_url`|アプリケーション登録時に入力したリダイレクトURL|  `scope`は、以下のうち、アプリケーションが利用したい機能をスペース区切りで指定してください。  |スコープ|機能| |---|---| |`read_products`|商品データの参照| |`write_products`|在庫データの更新| |`read_sales`|受注・顧客データの参照| |`write_sales`|受注データの更新|  以下のようなURLとなります。  ``` https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URL&response_type=code&scope=read_products%20write_products ```  初めてこのページを訪れる場合は、カラーミーショップアカウントのIDとパスワードの入力を求められます。 承認ボタンを押すと、このアプリケーションがショップのデータにアクセスすることが許可され、リダイレクトURLへリダイレクトされます。  承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、 `error`パラメータにエラーの内容を表す文字列が与えられます。  アプリケーション登録時のリダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされます。 末尾のパスが認可コードになっています。  ``` https://api.shop-pro.jp/oauth/authorize/AUTH_CODE ```  認可コードの有効期限は発行から10分間です。  最後に、認可コードとアクセストークンを交換します。以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。  |パラメータ名|値| |---|---| |`client_id`|アプリケーション詳細画面に表示されているクライアントID| |`client_secret`|アプリケーション詳細画面に表示されているクライアントシークレット| |`code`|取得した認可コード| |`grant_type`|\"authorization_code\"という文字列| |`redirect_uri`|アプリケーション登録時に入力したリダイレクトURL|  ```console # curl での例  $ curl -X POST \\   -d'client_id=CLIENT_ID' \\   -d'client_secret=CLIENT_SECRET' \\   -d'code=CODE' \\   -d'grant_type=authorization_code'   \\   -d'redirect_uri=REDIRECT_URI'  \\   'https://api.shop-pro.jp/oauth/token' ```  リクエストが成功すると、以下のようなJSONが返ってきます。  ```json {   \"access_token\": \"d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX\",   \"token_type\": \"bearer\",   \"scope\": \"read_products write_products\" } ```  アクセストークンに有効期限はありませんが、許可済みアプリケーション一覧画面から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。  取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する際の例を示します。  ```console # curlの例  $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json ```  ## エラー  カラーミーショップAPI v1では  - エラーコード - エラーメッセージ - ステータスコード  の配列でエラーを表現します。以下に例を示します。  ```json {   \"errors\": [     {       \"code\": 404100,       \"message\": \"レコードが見つかりませんでした。\",       \"status\": 404     }   ] } ``` 
+## カラーミーショップ API  ## 利用手順  ### OAuthアプリケーションの登録  デベロッパーアカウントをお持ちでない場合は作成します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。  次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリ登録を行ってください。 スマートフォンのWebViewを利用する場合は、リダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を入力してください。  ### 認可  カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。  |パラメータ名|値| |---|---| |`client_id`|アプリ詳細画面で確認できるクライアントID| |`response_type`|\"code\"を指定| |`scope`| 別表参照| |`redirect_uri`|アプリ登録時に入力したリダイレクトURI|  `scope`は、以下のうち、アプリが利用したい機能をスペース区切りで指定してください。  |スコープ|機能| |---|---| |`read_products`|商品データの参照| |`write_products`|在庫データの更新| |`read_sales`|受注・顧客データの参照| |`write_sales`|受注データの更新| |`read_shop_coupons`|ショップクーポンの参照|  以下のようなURLとなります。  ``` https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&response_type=code&scope=read_products%20write_products ```  初めてこのページを訪れる場合は、カラーミーショップアカウントのログインIDとパスワードの入力を求められます。  ログイン後の認証ページでアプリとの連携が承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、 `error`パラメータにエラーの内容を表す文字列が与えられます。  アプリ登録時のリダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされ、 認可コードがURLの末尾に付与されます。  ``` https://api.shop-pro.jp/oauth/authorize/AUTH_CODE ```  認可コードの有効期限は発行から10分間です。  ### 認可コードをアクセストークンに交換  以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。  |パラメータ名|値| |---|---| |`client_id`|アプリ詳細画面に表示されているクライアントID| |`client_secret`|アプリ詳細画面に表示されているクライアントシークレット| |`code`|取得した認可コード| |`grant_type`|\"authorization_code\"を指定| |`redirect_uri`|アプリ登録時に入力したリダイレクトURI|  curlによるリクエストの例を以下に示します。 ```console $ curl -X POST \\   -d'client_id=CLIENT_ID' \\   -d'client_secret=CLIENT_SECRET' \\   -d'code=CODE' \\   -d'grant_type=authorization_code'   \\   -d'redirect_uri=REDIRECT_URI'  \\   'https://api.shop-pro.jp/oauth/token' ```  リクエストが成功すると、以下のようなJSONが返却されます  ```json {   \"access_token\": \"d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX\",   \"token_type\": \"bearer\",   \"scope\": \"read_products write_products\" } ```  アクセストークンに有効期限はありませんが、[許可済みアプリ一覧画面](https://admin.shop-pro.jp/?mode=app_use_lst)から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。  ### APIの利用  取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する例を示します。  ```console $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json ```  ## エラー  カラーミーショップAPIでは、以下の形式の配列でエラーを表現します。  - `code` エラーコード - `message` エラーメッセージ - `status` ステータスコード  ```json {   \"errors\": [     {       \"code\": 404100,       \"message\": \"レコードが見つかりませんでした。\",       \"status\": 404     }   ] } ```  ## 都道府県コードについて APIを利用して都道府県コードを更新したり、レスポンスを参照される際には以下の表を参考にしてください。  <details>   <summary>都道府県コード一覧</summary>    |id|都道府県|   |---|---|   |1|北海道|   |2|青森県|   |3|岩手県|   |4|秋田県|   |5|宮城県|   |6|山形県|   |7|福島県|   |8|茨城県|   |9|栃木県|   |10|群馬県|   |11|埼玉県|   |12|千葉県|   |13|東京都|   |14|神奈川県|   |15|新潟県|   |16|福井県|   |17|石川県|   |18|富山県|   |19|静岡県|   |20|山梨県|   |21|長野県|   |22|愛知県|   |23|岐阜県|   |24|三重県|   |25|和歌山県|   |26|滋賀県|   |27|奈良県|   |28|京都府|   |29|大阪府|   |30|兵庫県|   |31|岡山県|   |32|広島県|   |33|鳥取県|   |34|島根県|   |35|山口県|   |36|香川県|   |37|徳島県|   |38|愛媛県|   |39|高知県|   |40|福岡県|   |41|佐賀県|   |42|長崎県|   |43|大分県|   |44|熊本県|   |45|宮崎県|   |46|鹿児島県|   |47|沖縄県|   |48|海外|  </details> 
 
-OpenAPI spec version: 1.0.0
+The version of the OpenAPI document: 1.0.0
 
 Generated by: https://openapi-generator.tech
-OpenAPI Generator version: 3.2.0-SNAPSHOT
+OpenAPI Generator version: 7.2.0-SNAPSHOT
 
 =end
 
 require 'date'
+require 'time'
 
 module ColorMeShop
   class Product
@@ -40,11 +41,17 @@ module ColorMeShop
     # 商品が属するグループのIDの配列
     attr_accessor :group_ids
 
-    # 掲載設定
+    # 掲載設定   - `showing`: 掲載状態  - `hidden`: 非掲載状態  - `showing_for_members`: 会員にのみ掲載  - `sale_for_members`: 掲載状態だが購入は会員のみ可能 
     attr_accessor :display_state
 
     # 販売価格
     attr_accessor :sales_price
+
+    # 消費税込販売価格
+    attr_accessor :sales_price_including_tax
+
+    # 消費税額
+    attr_accessor :sales_price_tax
 
     # 定価
     attr_accessor :price
@@ -52,11 +59,26 @@ module ColorMeShop
     # 会員価格
     attr_accessor :members_price
 
+    # 消費税込会員価格
+    attr_accessor :members_price_including_tax
+
+    # 会員価格の消費税額
+    attr_accessor :members_price_tax
+
     # 原価
     attr_accessor :cost
 
     # 個別送料
     attr_accessor :delivery_charge
+
+    # クール便の追加料金
+    attr_accessor :cool_charge
+
+    # 利用不可決済方法の配列
+    attr_accessor :unavailable_payment_ids
+
+    # 利用不可配送方法の配列
+    attr_accessor :unavailable_delivery_ids
 
     # 最小購入数量
     attr_accessor :min_num
@@ -121,8 +143,20 @@ module ColorMeShop
     # オプションのバリエーション一覧
     attr_accessor :variants
 
-    # おすすめ商品情報
+    # おすすめ商品情報  ※おすすめ商品種別が「3: 新着商品」の情報は、「[新着商品管理](https://shop-pro.jp/manual/new_item_lst)」が「手動モード」の場合のみ取得できます。 
     attr_accessor :pickups
+
+    # デジタルコンテンツ商品かどうか
+    attr_accessor :digital_conent
+
+    # 定期購入商品かどうか
+    attr_accessor :regular_purchase
+
+    # 軽減税率対象なら `true`
+    attr_accessor :tax_reduced
+
+    # 配送不要商品なら `true`
+    attr_accessor :without_shipping
 
     class EnumAttributeValidator
       attr_reader :datatype
@@ -160,10 +194,17 @@ module ColorMeShop
         :'group_ids' => :'group_ids',
         :'display_state' => :'display_state',
         :'sales_price' => :'sales_price',
+        :'sales_price_including_tax' => :'sales_price_including_tax',
+        :'sales_price_tax' => :'sales_price_tax',
         :'price' => :'price',
         :'members_price' => :'members_price',
+        :'members_price_including_tax' => :'members_price_including_tax',
+        :'members_price_tax' => :'members_price_tax',
         :'cost' => :'cost',
         :'delivery_charge' => :'delivery_charge',
+        :'cool_charge' => :'cool_charge',
+        :'unavailable_payment_ids' => :'unavailable_payment_ids',
+        :'unavailable_delivery_ids' => :'unavailable_delivery_ids',
         :'min_num' => :'min_num',
         :'max_num' => :'max_num',
         :'sale_start_date' => :'sale_start_date',
@@ -185,8 +226,17 @@ module ColorMeShop
         :'images' => :'images',
         :'options' => :'options',
         :'variants' => :'variants',
-        :'pickups' => :'pickups'
+        :'pickups' => :'pickups',
+        :'digital_conent' => :'digital_conent',
+        :'regular_purchase' => :'regular_purchase',
+        :'tax_reduced' => :'tax_reduced',
+        :'without_shipping' => :'without_shipping'
       }
+    end
+
+    # Returns all the JSON keys this model knows about
+    def self.acceptable_attributes
+      attribute_map.values
     end
 
     # Attribute type mapping.
@@ -196,24 +246,31 @@ module ColorMeShop
         :'id' => :'Integer',
         :'name' => :'String',
         :'stocks' => :'Integer',
-        :'stock_managed' => :'BOOLEAN',
+        :'stock_managed' => :'Boolean',
         :'few_num' => :'Integer',
         :'model_number' => :'String',
-        :'category' => :'Object',
+        :'category' => :'GetProducts200ResponseProductsInnerCategory',
         :'group_ids' => :'Array<Integer>',
         :'display_state' => :'String',
         :'sales_price' => :'Integer',
+        :'sales_price_including_tax' => :'Integer',
+        :'sales_price_tax' => :'Integer',
         :'price' => :'Integer',
         :'members_price' => :'Integer',
+        :'members_price_including_tax' => :'Integer',
+        :'members_price_tax' => :'Integer',
         :'cost' => :'Integer',
         :'delivery_charge' => :'Integer',
+        :'cool_charge' => :'Integer',
+        :'unavailable_payment_ids' => :'Array<Integer>',
+        :'unavailable_delivery_ids' => :'Array<Integer>',
         :'min_num' => :'Integer',
         :'max_num' => :'Integer',
         :'sale_start_date' => :'Integer',
         :'sale_end_date' => :'Integer',
         :'unit' => :'String',
         :'weight' => :'Integer',
-        :'soldout_display' => :'BOOLEAN',
+        :'soldout_display' => :'Boolean',
         :'sort' => :'Integer',
         :'simple_expl' => :'String',
         :'expl' => :'String',
@@ -225,203 +282,333 @@ module ColorMeShop
         :'image_url' => :'String',
         :'mobile_image_url' => :'String',
         :'thumbnail_image_url' => :'String',
-        :'images' => :'Array<Object>',
-        :'options' => :'Array<ProductOption>',
-        :'variants' => :'Array<ProductVariant>',
-        :'pickups' => :'Array<Object>'
+        :'images' => :'Array<GetProducts200ResponseProductsInnerImagesInner>',
+        :'options' => :'Array<GetProducts200ResponseProductsInnerOptionsInner>',
+        :'variants' => :'Array<GetProducts200ResponseProductsInnerVariantsInner>',
+        :'pickups' => :'Array<GetProducts200ResponseProductsInnerPickupsInner>',
+        :'digital_conent' => :'Boolean',
+        :'regular_purchase' => :'Boolean',
+        :'tax_reduced' => :'Boolean',
+        :'without_shipping' => :'Boolean'
       }
+    end
+
+    # List of attributes with nullable: true
+    def self.openapi_nullable
+      Set.new([
+        :'stocks',
+        :'few_num',
+        :'model_number',
+        :'category',
+        :'sales_price',
+        :'price',
+        :'members_price',
+        :'cost',
+        :'delivery_charge',
+        :'cool_charge',
+        :'min_num',
+        :'max_num',
+        :'sale_start_date',
+        :'sale_end_date',
+        :'unit',
+        :'weight',
+        :'sort',
+        :'simple_expl',
+        :'expl',
+        :'mobile_expl',
+        :'smartphone_expl',
+        :'memo',
+        :'image_url',
+        :'mobile_image_url',
+        :'thumbnail_image_url',
+      ])
     end
 
     # Initializes the object
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
-      return unless attributes.is_a?(Hash)
+      if (!attributes.is_a?(Hash))
+        fail ArgumentError, "The input argument (attributes) must be a hash in `ColorMeShop::Product` initialize method"
+      end
 
-      # convert string to symbol for hash key
-      attributes = attributes.each_with_object({}) { |(k, v), h| h[k.to_sym] = v }
+      # check to see if the attribute exists and convert string to symbol for hash key
+      attributes = attributes.each_with_object({}) { |(k, v), h|
+        if (!self.class.attribute_map.key?(k.to_sym))
+          fail ArgumentError, "`#{k}` is not a valid attribute in `ColorMeShop::Product`. Please check the name to make sure it's valid. List of attributes: " + self.class.attribute_map.keys.inspect
+        end
+        h[k.to_sym] = v
+      }
 
-      if attributes.has_key?(:'account_id')
+      if attributes.key?(:'account_id')
         self.account_id = attributes[:'account_id']
       end
 
-      if attributes.has_key?(:'id')
+      if attributes.key?(:'id')
         self.id = attributes[:'id']
       end
 
-      if attributes.has_key?(:'name')
+      if attributes.key?(:'name')
         self.name = attributes[:'name']
       end
 
-      if attributes.has_key?(:'stocks')
+      if attributes.key?(:'stocks')
         self.stocks = attributes[:'stocks']
       end
 
-      if attributes.has_key?(:'stock_managed')
+      if attributes.key?(:'stock_managed')
         self.stock_managed = attributes[:'stock_managed']
       end
 
-      if attributes.has_key?(:'few_num')
+      if attributes.key?(:'few_num')
         self.few_num = attributes[:'few_num']
       end
 
-      if attributes.has_key?(:'model_number')
+      if attributes.key?(:'model_number')
         self.model_number = attributes[:'model_number']
       end
 
-      if attributes.has_key?(:'category')
+      if attributes.key?(:'category')
         self.category = attributes[:'category']
       end
 
-      if attributes.has_key?(:'group_ids')
+      if attributes.key?(:'group_ids')
         if (value = attributes[:'group_ids']).is_a?(Array)
           self.group_ids = value
         end
       end
 
-      if attributes.has_key?(:'display_state')
+      if attributes.key?(:'display_state')
         self.display_state = attributes[:'display_state']
       end
 
-      if attributes.has_key?(:'sales_price')
+      if attributes.key?(:'sales_price')
         self.sales_price = attributes[:'sales_price']
       end
 
-      if attributes.has_key?(:'price')
+      if attributes.key?(:'sales_price_including_tax')
+        self.sales_price_including_tax = attributes[:'sales_price_including_tax']
+      end
+
+      if attributes.key?(:'sales_price_tax')
+        self.sales_price_tax = attributes[:'sales_price_tax']
+      end
+
+      if attributes.key?(:'price')
         self.price = attributes[:'price']
       end
 
-      if attributes.has_key?(:'members_price')
+      if attributes.key?(:'members_price')
         self.members_price = attributes[:'members_price']
       end
 
-      if attributes.has_key?(:'cost')
+      if attributes.key?(:'members_price_including_tax')
+        self.members_price_including_tax = attributes[:'members_price_including_tax']
+      end
+
+      if attributes.key?(:'members_price_tax')
+        self.members_price_tax = attributes[:'members_price_tax']
+      end
+
+      if attributes.key?(:'cost')
         self.cost = attributes[:'cost']
       end
 
-      if attributes.has_key?(:'delivery_charge')
+      if attributes.key?(:'delivery_charge')
         self.delivery_charge = attributes[:'delivery_charge']
       end
 
-      if attributes.has_key?(:'min_num')
+      if attributes.key?(:'cool_charge')
+        self.cool_charge = attributes[:'cool_charge']
+      end
+
+      if attributes.key?(:'unavailable_payment_ids')
+        if (value = attributes[:'unavailable_payment_ids']).is_a?(Array)
+          self.unavailable_payment_ids = value
+        end
+      end
+
+      if attributes.key?(:'unavailable_delivery_ids')
+        if (value = attributes[:'unavailable_delivery_ids']).is_a?(Array)
+          self.unavailable_delivery_ids = value
+        end
+      end
+
+      if attributes.key?(:'min_num')
         self.min_num = attributes[:'min_num']
       end
 
-      if attributes.has_key?(:'max_num')
+      if attributes.key?(:'max_num')
         self.max_num = attributes[:'max_num']
       end
 
-      if attributes.has_key?(:'sale_start_date')
+      if attributes.key?(:'sale_start_date')
         self.sale_start_date = attributes[:'sale_start_date']
       end
 
-      if attributes.has_key?(:'sale_end_date')
+      if attributes.key?(:'sale_end_date')
         self.sale_end_date = attributes[:'sale_end_date']
       end
 
-      if attributes.has_key?(:'unit')
+      if attributes.key?(:'unit')
         self.unit = attributes[:'unit']
       end
 
-      if attributes.has_key?(:'weight')
+      if attributes.key?(:'weight')
         self.weight = attributes[:'weight']
       end
 
-      if attributes.has_key?(:'soldout_display')
+      if attributes.key?(:'soldout_display')
         self.soldout_display = attributes[:'soldout_display']
       end
 
-      if attributes.has_key?(:'sort')
+      if attributes.key?(:'sort')
         self.sort = attributes[:'sort']
       end
 
-      if attributes.has_key?(:'simple_expl')
+      if attributes.key?(:'simple_expl')
         self.simple_expl = attributes[:'simple_expl']
       end
 
-      if attributes.has_key?(:'expl')
+      if attributes.key?(:'expl')
         self.expl = attributes[:'expl']
       end
 
-      if attributes.has_key?(:'mobile_expl')
+      if attributes.key?(:'mobile_expl')
         self.mobile_expl = attributes[:'mobile_expl']
       end
 
-      if attributes.has_key?(:'smartphone_expl')
+      if attributes.key?(:'smartphone_expl')
         self.smartphone_expl = attributes[:'smartphone_expl']
       end
 
-      if attributes.has_key?(:'make_date')
+      if attributes.key?(:'make_date')
         self.make_date = attributes[:'make_date']
       end
 
-      if attributes.has_key?(:'update_date')
+      if attributes.key?(:'update_date')
         self.update_date = attributes[:'update_date']
       end
 
-      if attributes.has_key?(:'memo')
+      if attributes.key?(:'memo')
         self.memo = attributes[:'memo']
       end
 
-      if attributes.has_key?(:'image_url')
+      if attributes.key?(:'image_url')
         self.image_url = attributes[:'image_url']
       end
 
-      if attributes.has_key?(:'mobile_image_url')
+      if attributes.key?(:'mobile_image_url')
         self.mobile_image_url = attributes[:'mobile_image_url']
       end
 
-      if attributes.has_key?(:'thumbnail_image_url')
+      if attributes.key?(:'thumbnail_image_url')
         self.thumbnail_image_url = attributes[:'thumbnail_image_url']
       end
 
-      if attributes.has_key?(:'images')
+      if attributes.key?(:'images')
         if (value = attributes[:'images']).is_a?(Array)
           self.images = value
         end
       end
 
-      if attributes.has_key?(:'options')
+      if attributes.key?(:'options')
         if (value = attributes[:'options']).is_a?(Array)
           self.options = value
         end
       end
 
-      if attributes.has_key?(:'variants')
+      if attributes.key?(:'variants')
         if (value = attributes[:'variants']).is_a?(Array)
           self.variants = value
         end
       end
 
-      if attributes.has_key?(:'pickups')
+      if attributes.key?(:'pickups')
         if (value = attributes[:'pickups']).is_a?(Array)
           self.pickups = value
         end
+      end
+
+      if attributes.key?(:'digital_conent')
+        self.digital_conent = attributes[:'digital_conent']
+      end
+
+      if attributes.key?(:'regular_purchase')
+        self.regular_purchase = attributes[:'regular_purchase']
+      end
+
+      if attributes.key?(:'tax_reduced')
+        self.tax_reduced = attributes[:'tax_reduced']
+      end
+
+      if attributes.key?(:'without_shipping')
+        self.without_shipping = attributes[:'without_shipping']
       end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
     # @return Array for valid properties with the reasons
     def list_invalid_properties
+      warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if !@group_ids.nil? && @group_ids.length < 0
+        invalid_properties.push('invalid value for "group_ids", number of items must be greater than or equal to 0.')
+      end
+
+      if !@images.nil? && @images.length > 6
+        invalid_properties.push('invalid value for "images", number of items must be less than or equal to 6.')
+      end
+
       invalid_properties
     end
 
     # Check to see if the all the properties in the model are valid
     # @return true if the model is valid
     def valid?
-      display_state_validator = EnumAttributeValidator.new('String', ['showing', 'hidden', 'showing_for_members', 'sale_for_members'])
+      warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if !@group_ids.nil? && @group_ids.length < 0
+      display_state_validator = EnumAttributeValidator.new('String', ["showing", "hidden", "showing_for_members", "sale_for_members"])
       return false unless display_state_validator.valid?(@display_state)
+      return false if !@images.nil? && @images.length > 6
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] group_ids Value to be assigned
+    def group_ids=(group_ids)
+      if group_ids.nil?
+        fail ArgumentError, 'group_ids cannot be nil'
+      end
+
+      if group_ids.length < 0
+        fail ArgumentError, 'invalid value for "group_ids", number of items must be greater than or equal to 0.'
+      end
+
+      @group_ids = group_ids
     end
 
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] display_state Object to be assigned
     def display_state=(display_state)
-      validator = EnumAttributeValidator.new('String', ['showing', 'hidden', 'showing_for_members', 'sale_for_members'])
+      validator = EnumAttributeValidator.new('String', ["showing", "hidden", "showing_for_members", "sale_for_members"])
       unless validator.valid?(display_state)
-        fail ArgumentError, 'invalid value for "display_state", must be one of #{validator.allowable_values}.'
+        fail ArgumentError, "invalid value for \"display_state\", must be one of #{validator.allowable_values}."
       end
       @display_state = display_state
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] images Value to be assigned
+    def images=(images)
+      if images.nil?
+        fail ArgumentError, 'images cannot be nil'
+      end
+
+      if images.length > 6
+        fail ArgumentError, 'invalid value for "images", number of items must be less than or equal to 6.'
+      end
+
+      @images = images
     end
 
     # Checks equality by comparing each attribute.
@@ -440,10 +627,17 @@ module ColorMeShop
           group_ids == o.group_ids &&
           display_state == o.display_state &&
           sales_price == o.sales_price &&
+          sales_price_including_tax == o.sales_price_including_tax &&
+          sales_price_tax == o.sales_price_tax &&
           price == o.price &&
           members_price == o.members_price &&
+          members_price_including_tax == o.members_price_including_tax &&
+          members_price_tax == o.members_price_tax &&
           cost == o.cost &&
           delivery_charge == o.delivery_charge &&
+          cool_charge == o.cool_charge &&
+          unavailable_payment_ids == o.unavailable_payment_ids &&
+          unavailable_delivery_ids == o.unavailable_delivery_ids &&
           min_num == o.min_num &&
           max_num == o.max_num &&
           sale_start_date == o.sale_start_date &&
@@ -465,7 +659,11 @@ module ColorMeShop
           images == o.images &&
           options == o.options &&
           variants == o.variants &&
-          pickups == o.pickups
+          pickups == o.pickups &&
+          digital_conent == o.digital_conent &&
+          regular_purchase == o.regular_purchase &&
+          tax_reduced == o.tax_reduced &&
+          without_shipping == o.without_shipping
     end
 
     # @see the `==` method
@@ -475,39 +673,42 @@ module ColorMeShop
     end
 
     # Calculates hash code according to all attributes.
-    # @return [Fixnum] Hash code
+    # @return [Integer] Hash code
     def hash
-      [account_id, id, name, stocks, stock_managed, few_num, model_number, category, group_ids, display_state, sales_price, price, members_price, cost, delivery_charge, min_num, max_num, sale_start_date, sale_end_date, unit, weight, soldout_display, sort, simple_expl, expl, mobile_expl, smartphone_expl, make_date, update_date, memo, image_url, mobile_image_url, thumbnail_image_url, images, options, variants, pickups].hash
+      [account_id, id, name, stocks, stock_managed, few_num, model_number, category, group_ids, display_state, sales_price, sales_price_including_tax, sales_price_tax, price, members_price, members_price_including_tax, members_price_tax, cost, delivery_charge, cool_charge, unavailable_payment_ids, unavailable_delivery_ids, min_num, max_num, sale_start_date, sale_end_date, unit, weight, soldout_display, sort, simple_expl, expl, mobile_expl, smartphone_expl, make_date, update_date, memo, image_url, mobile_image_url, thumbnail_image_url, images, options, variants, pickups, digital_conent, regular_purchase, tax_reduced, without_shipping].hash
     end
 
     # Builds the object from hash
     # @param [Hash] attributes Model attributes in the form of hash
     # @return [Object] Returns the model itself
-    def build_from_hash(attributes)
+    def self.build_from_hash(attributes)
       return nil unless attributes.is_a?(Hash)
-      self.class.openapi_types.each_pair do |key, type|
-        if type =~ /\AArray<(.*)>/i
-          # check to ensure the input is an array given that the the attribute
+      attributes = attributes.transform_keys(&:to_sym)
+      transformed_hash = {}
+      openapi_types.each_pair do |key, type|
+        if attributes.key?(attribute_map[key]) && attributes[attribute_map[key]].nil?
+          transformed_hash["#{key}"] = nil
+        elsif type =~ /\AArray<(.*)>/i
+          # check to ensure the input is an array given that the attribute
           # is documented as an array but the input is not
-          if attributes[self.class.attribute_map[key]].is_a?(Array)
-            self.send("#{key}=", attributes[self.class.attribute_map[key]].map { |v| _deserialize($1, v) })
+          if attributes[attribute_map[key]].is_a?(Array)
+            transformed_hash["#{key}"] = attributes[attribute_map[key]].map { |v| _deserialize($1, v) }
           end
-        elsif !attributes[self.class.attribute_map[key]].nil?
-          self.send("#{key}=", _deserialize(type, attributes[self.class.attribute_map[key]]))
-        end # or else data not found in attributes(hash), not an issue as the data can be optional
+        elsif !attributes[attribute_map[key]].nil?
+          transformed_hash["#{key}"] = _deserialize(type, attributes[attribute_map[key]])
+        end
       end
-
-      self
+      new(transformed_hash)
     end
 
     # Deserializes the data based on type
     # @param string type Data type
     # @param string value Value to be deserialized
     # @return [Object] Deserialized data
-    def _deserialize(type, value)
+    def self._deserialize(type, value)
       case type.to_sym
-      when :DateTime
-        DateTime.parse(value)
+      when :Time
+        Time.parse(value)
       when :Date
         Date.parse(value)
       when :String
@@ -516,7 +717,7 @@ module ColorMeShop
         value.to_i
       when :Float
         value.to_f
-      when :BOOLEAN
+      when :Boolean
         if value.to_s =~ /\A(true|t|yes|y|1)\z/i
           true
         else
@@ -537,8 +738,9 @@ module ColorMeShop
           end
         end
       else # model
-        temp_model = ColorMeShop.const_get(type).new
-        temp_model.build_from_hash(value)
+        # models (e.g. Pet) or oneOf
+        klass = ColorMeShop.const_get(type)
+        klass.respond_to?(:openapi_any_of) || klass.respond_to?(:openapi_one_of) ? klass.build(value) : klass.build_from_hash(value)
       end
     end
 
@@ -560,7 +762,11 @@ module ColorMeShop
       hash = {}
       self.class.attribute_map.each_pair do |attr, param|
         value = self.send(attr)
-        next if value.nil?
+        if value.nil?
+          is_nullable = self.class.openapi_nullable.include?(attr)
+          next if !is_nullable || (is_nullable && !instance_variable_defined?(:"@#{attr}"))
+        end
+
         hash[param] = _to_hash(value)
       end
       hash
@@ -583,5 +789,7 @@ module ColorMeShop
         value
       end
     end
+
   end
+
 end

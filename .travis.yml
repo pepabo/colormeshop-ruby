@@ -1,0 +1,11 @@
+language: ruby
+cache: bundler
+rvm:
+  - 2.7
+  - 3.0
+  - 3.1
+script:
+  - bundle install --path vendor/bundle
+  - bundle exec rspec
+  - gem build color_me_shop.gemspec
+  - gem install ./color_me_shop-1.1.0.gem

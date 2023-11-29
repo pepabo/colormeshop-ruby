@@ -4,25 +4,27 @@ ColorMeShop - the Ruby gem for the カラーミーショップ API
 
 # カラーミーショップ API
 
-[カラーミーショップ](https://shop-pro.jp) APIでは、受注の検索や商品情報の更新を行うことができます。
-
 ## 利用手順
 
-はじめに、カラーミーデベロッパーアカウントを用意します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。
+### OAuthアプリケーションの登録
 
-次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリケーション登録を行ってください。
-スマートフォンのWebViewを利用する場合は、リダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を入力してください。
+デベロッパーアカウントをお持ちでない場合は作成します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。
 
-その後、カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。
+次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリ登録を行ってください。
+スマートフォンのWebViewを利用する場合は、リダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を入力してください。
+
+### 認可
+
+カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。
 
 |パラメータ名|値|
 |---|---|
-|`client_id`|アプリケーション詳細画面で確認できるクライアントID|
-|`response_type`|\"code\"という文字列|
+|`client_id`|アプリ詳細画面で確認できるクライアントID|
+|`response_type`|\"code\"を指定|
 |`scope`| 別表参照|
-|`redirect_url`|アプリケーション登録時に入力したリダイレクトURL|
+|`redirect_uri`|アプリ登録時に入力したリダイレクトURI|
 
-`scope`は、以下のうち、アプリケーションが利用したい機能をスペース区切りで指定してください。
+`scope`は、以下のうち、アプリが利用したい機能をスペース区切りで指定してください。
 
 |スコープ|機能|
 |---|---|
@@ -30,21 +32,21 @@ ColorMeShop - the Ruby gem for the カラーミーショップ API
 |`write_products`|在庫データの更新|
 |`read_sales`|受注・顧客データの参照|
 |`write_sales`|受注データの更新|
+|`read_shop_coupons`|ショップクーポンの参照|
 
 以下のようなURLとなります。
 
 ```
-https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URL&response_type=code&scope=read_products%20write_products
+https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&response_type=code&scope=read_products%20write_products
 ```
 
-初めてこのページを訪れる場合は、カラーミーショップアカウントのIDとパスワードの入力を求められます。
-承認ボタンを押すと、このアプリケーションがショップのデータにアクセスすることが許可され、リダイレクトURLへリダイレクトされます。
+初めてこのページを訪れる場合は、カラーミーショップアカウントのログインIDとパスワードの入力を求められます。
 
-承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、
+ログイン後の認証ページでアプリとの連携が承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、
 `error`パラメータにエラーの内容を表す文字列が与えられます。
 
-アプリケーション登録時のリダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされます。
-末尾のパスが認可コードになっています。
+アプリ登録時のリダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされ、
+認可コードがURLの末尾に付与されます。
 
 ```
 https://api.shop-pro.jp/oauth/authorize/AUTH_CODE
@@ -52,19 +54,20 @@ https://api.shop-pro.jp/oauth/authorize/AUTH_CODE
 
 認可コードの有効期限は発行から10分間です。
 
-最後に、認可コードとアクセストークンを交換します。以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。
+### 認可コードをアクセストークンに交換
+
+以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。
 
 |パラメータ名|値|
 |---|---|
-|`client_id`|アプリケーション詳細画面に表示されているクライアントID|
-|`client_secret`|アプリケーション詳細画面に表示されているクライアントシークレット|
+|`client_id`|アプリ詳細画面に表示されているクライアントID|
+|`client_secret`|アプリ詳細画面に表示されているクライアントシークレット|
 |`code`|取得した認可コード|
-|`grant_type`|\"authorization_code\"という文字列|
-|`redirect_uri`|アプリケーション登録時に入力したリダイレクトURL|
+|`grant_type`|\"authorization_code\"を指定|
+|`redirect_uri`|アプリ登録時に入力したリダイレクトURI|
 
+curlによるリクエストの例を以下に示します。
 ```console
-# curl での例
-
 $ curl -X POST \\
   -d'client_id=CLIENT_ID' \\
   -d'client_secret=CLIENT_SECRET' \\
@@ -74,7 +77,7 @@ $ curl -X POST \\
   'https://api.shop-pro.jp/oauth/token'
 ```
 
-リクエストが成功すると、以下のようなJSONが返ってきます。
+リクエストが成功すると、以下のようなJSONが返却されます
 
 ```json
 {
@@ -84,25 +87,23 @@ $ curl -X POST \\
 }
 ```
 
-アクセストークンに有効期限はありませんが、許可済みアプリケーション一覧画面から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。
+アクセストークンに有効期限はありませんが、[許可済みアプリ一覧画面](https://admin.shop-pro.jp/?mode=app_use_lst)から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。
 
-取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する際の例を示します。
+### APIの利用
+
+取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する例を示します。
 
 ```console
-# curlの例
-
 $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json
 ```
 
 ## エラー
 
-カラーミーショップAPI v1では
+カラーミーショップAPIでは、以下の形式の配列でエラーを表現します。
 
-- エラーコード
-- エラーメッセージ
-- ステータスコード
-
-の配列でエラーを表現します。以下に例を示します。
+- `code` エラーコード
+- `message` エラーメッセージ
+- `status` ステータスコード
 
 ```json
 {
@@ -116,13 +117,72 @@ $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.s
 }
 ```
 
+## 都道府県コードについて
+APIを利用して都道府県コードを更新したり、レスポンスを参照される際には以下の表を参考にしてください。
+
+<details>
+  <summary>都道府県コード一覧</summary>
+
+  |id|都道府県|
+  |---|---|
+  |1|北海道|
+  |2|青森県|
+  |3|岩手県|
+  |4|秋田県|
+  |5|宮城県|
+  |6|山形県|
+  |7|福島県|
+  |8|茨城県|
+  |9|栃木県|
+  |10|群馬県|
+  |11|埼玉県|
+  |12|千葉県|
+  |13|東京都|
+  |14|神奈川県|
+  |15|新潟県|
+  |16|福井県|
+  |17|石川県|
+  |18|富山県|
+  |19|静岡県|
+  |20|山梨県|
+  |21|長野県|
+  |22|愛知県|
+  |23|岐阜県|
+  |24|三重県|
+  |25|和歌山県|
+  |26|滋賀県|
+  |27|奈良県|
+  |28|京都府|
+  |29|大阪府|
+  |30|兵庫県|
+  |31|岡山県|
+  |32|広島県|
+  |33|鳥取県|
+  |34|島根県|
+  |35|山口県|
+  |36|香川県|
+  |37|徳島県|
+  |38|愛媛県|
+  |39|高知県|
+  |40|福岡県|
+  |41|佐賀県|
+  |42|長崎県|
+  |43|大分県|
+  |44|熊本県|
+  |45|宮崎県|
+  |46|鹿児島県|
+  |47|沖縄県|
+  |48|海外|
+
+</details>
+
 
 This SDK is automatically generated by the [OpenAPI Generator](https://openapi-generator.tech) project:
 
 - API version: 1.0.0
 - Package version: 1.1.0
 - Build package: org.openapitools.codegen.languages.RubyClientCodegen
-For more information, please visit [https://shop-pro.jp/?mode=inq](https://shop-pro.jp/?mode=inq)
+For more information, please visit [https://developer.shop-pro.jp](https://developer.shop-pro.jp)
 
 ## Installation
 
@@ -139,6 +199,7 @@ Then either install the gem locally:
 ```shell
 gem install ./color_me_shop-1.1.0.gem
 ```
+
 (for development, run `gem install --dev ./color_me_shop-1.1.0.gem` to install the development dependencies)
 
 or publish the gem to a gem hosting service, e.g. [RubyGems](https://rubygems.org/).
@@ -164,6 +225,7 @@ ruby -Ilib script.rb
 ## Getting Started
 
 Please follow the [installation](#installation) procedure and then run the following code:
+
 ```ruby
 # Load the gem
 require 'color_me_shop'
@@ -172,6 +234,8 @@ require 'color_me_shop'
 ColorMeShop.configure do |config|
   # Configure OAuth2 access token for authorization: OAuth2
   config.access_token = 'YOUR ACCESS TOKEN'
+  # Configure a proc to get access tokens in lieu of the static access_token configuration
+  config.access_token_getter = -> { 'YOUR TOKEN GETTER PROC' } 
 end
 
 api_instance = ColorMeShop::CategoryApi.new
@@ -192,76 +256,147 @@ All URIs are relative to *https://api.shop-pro.jp*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*ColorMeShop::CategoryApi* | [**get_product_categories**](docs/CategoryApi.md#get_product_categories) | **GET** /v1/categories.json | 商品カテゴリー一覧を取得
-*ColorMeShop::ChargeApi* | [**activate_application_charge**](docs/ChargeApi.md#activate_application_charge) | **POST** /v1/application_charges/{applicationChargeId}/activate.json | スポット課金データをアクティベートする
-*ColorMeShop::ChargeApi* | [**activate_recurring_application_charge**](docs/ChargeApi.md#activate_recurring_application_charge) | **POST** /v1/recurring_application_charges/{recurringApplicationChargeId}/activate.json | 月額課金データをアクティベートする
-*ColorMeShop::ChargeApi* | [**cancel_recurring_application_charge**](docs/ChargeApi.md#cancel_recurring_application_charge) | **POST** /v1/recurring_application_charges/{recurringApplicationChargeId}/cancel.json | 月額課金データをキャンセルする
-*ColorMeShop::ChargeApi* | [**get_application_charge**](docs/ChargeApi.md#get_application_charge) | **GET** /v1/application_charges/{applicationChargeId}.json | スポット課金データの取得
-*ColorMeShop::ChargeApi* | [**get_application_charges**](docs/ChargeApi.md#get_application_charges) | **GET** /v1/application_charges.json | スポット課金一覧の取得
-*ColorMeShop::ChargeApi* | [**get_recurring_application_charge**](docs/ChargeApi.md#get_recurring_application_charge) | **GET** /v1/recurring_application_charges/{recurringApplicationChargeId}.json | 月額課金データの取得
-*ColorMeShop::ChargeApi* | [**get_recurring_application_charges**](docs/ChargeApi.md#get_recurring_application_charges) | **GET** /v1/recurring_application_charges.json | 月額課金一覧の取得
-*ColorMeShop::ChargeApi* | [**post_application_charge**](docs/ChargeApi.md#post_application_charge) | **POST** /v1/application_charges.json | スポット課金データの作成
-*ColorMeShop::ChargeApi* | [**post_recurring_application_charge**](docs/ChargeApi.md#post_recurring_application_charge) | **POST** /v1/recurring_application_charges.json | 月額課金データの作成
-*ColorMeShop::CustomerApi* | [**get_customer**](docs/CustomerApi.md#get_customer) | **GET** /v1/customers/{customerId}.json | 顧客データの取得
-*ColorMeShop::CustomerApi* | [**get_customers**](docs/CustomerApi.md#get_customers) | **GET** /v1/customers.json | 顧客データのリストを取得
-*ColorMeShop::CustomerApi* | [**post_customers**](docs/CustomerApi.md#post_customers) | **POST** /v1/customers.json | 顧客データを追加
-*ColorMeShop::DeliveryApi* | [**get_deliveries**](docs/DeliveryApi.md#get_deliveries) | **GET** /v1/deliveries.json | 配送方法一覧を取得
-*ColorMeShop::DeliveryApi* | [**get_delivery_date_setting**](docs/DeliveryApi.md#get_delivery_date_setting) | **GET** /v1/deliveries/date.json | 配送日時設定を取得
-*ColorMeShop::EtcApi* | [**delete_device_token**](docs/EtcApi.md#delete_device_token) | **DELETE** /v1/device_tokens/{token}.json | デバイストークンの削除
-*ColorMeShop::GiftApi* | [**get_gift**](docs/GiftApi.md#get_gift) | **GET** /v1/gift.json | ギフト設定を取得
-*ColorMeShop::GroupApi* | [**get_product_groups**](docs/GroupApi.md#get_product_groups) | **GET** /v1/groups.json | 商品グループ一覧を取得
-*ColorMeShop::PaymentApi* | [**get_payments**](docs/PaymentApi.md#get_payments) | **GET** /v1/payments.json | 決済設定の一覧を取得
-*ColorMeShop::ProductApi* | [**delete_product_pickup**](docs/ProductApi.md#delete_product_pickup) | **DELETE** /v1/products/{productId}/pickups/{pickupType}.json | おすすめ商品情報の削除
-*ColorMeShop::ProductApi* | [**get_product**](docs/ProductApi.md#get_product) | **GET** /v1/products/{productId}.json | 商品データの取得
-*ColorMeShop::ProductApi* | [**get_products**](docs/ProductApi.md#get_products) | **GET** /v1/products.json | 商品一覧の取得
-*ColorMeShop::ProductApi* | [**post_product_pickup**](docs/ProductApi.md#post_product_pickup) | **POST** /v1/products/{productId}/pickups.json | おすすめ商品情報の追加
-*ColorMeShop::ProductApi* | [**update_product**](docs/ProductApi.md#update_product) | **PUT** /v1/products/{productId}.json | 商品データの更新
-*ColorMeShop::SaleApi* | [**cancel_sale**](docs/SaleApi.md#cancel_sale) | **PUT** /v1/sales/{saleId}/cancel.json | 受注のキャンセル
-*ColorMeShop::SaleApi* | [**get_sale**](docs/SaleApi.md#get_sale) | **GET** /v1/sales/{saleId}.json | 受注データの取得
-*ColorMeShop::SaleApi* | [**get_sales**](docs/SaleApi.md#get_sales) | **GET** /v1/sales.json | 受注データのリストを取得
-*ColorMeShop::SaleApi* | [**send_sales_mail**](docs/SaleApi.md#send_sales_mail) | **POST** /v1/sales/{saleId}/mails.json | メールの送信
-*ColorMeShop::SaleApi* | [**stat_sale**](docs/SaleApi.md#stat_sale) | **GET** /v1/sales/stat.json | 売上集計の取得
-*ColorMeShop::SaleApi* | [**update_sale**](docs/SaleApi.md#update_sale) | **PUT** /v1/sales/{saleId}.json | 受注データの更新
-*ColorMeShop::ScriptApi* | [**create_script_tag**](docs/ScriptApi.md#create_script_tag) | **POST** /v1/script_tags.json | スクリプトタグの作成
-*ColorMeShop::ScriptApi* | [**delete_script_tag**](docs/ScriptApi.md#delete_script_tag) | **DELETE** /v1/script_tags/{scriptTagId}.json | スクリプトタグの削除
-*ColorMeShop::ScriptApi* | [**get_script_tag**](docs/ScriptApi.md#get_script_tag) | **GET** /v1/script_tags/{scriptTagId}.json | スクリプトタグの取得
-*ColorMeShop::ScriptApi* | [**get_script_tags**](docs/ScriptApi.md#get_script_tags) | **GET** /v1/script_tags.json | スクリプトタグの取得
-*ColorMeShop::ScriptApi* | [**update_script_tag**](docs/ScriptApi.md#update_script_tag) | **PUT** /v1/script_tags/{scriptTagId}.json | スクリプトタグの更新
-*ColorMeShop::ShopApi* | [**get_shop**](docs/ShopApi.md#get_shop) | **GET** /v1/shop.json | ショップ情報の取得
-*ColorMeShop::StockApi* | [**get_stocks**](docs/StockApi.md#get_stocks) | **GET** /v1/stocks.json | 在庫情報の取得
+*ColorMeShop::CategoryApi* | [**get_product_categories**](docs/CategoryApi.md#get_product_categories) | **GET** /v1/categories | 商品カテゴリー一覧を取得
+*ColorMeShop::CustomerApi* | [**get_customer**](docs/CustomerApi.md#get_customer) | **GET** /v1/customers/{customer_id} | 顧客データの取得
+*ColorMeShop::CustomerApi* | [**get_customers**](docs/CustomerApi.md#get_customers) | **GET** /v1/customers | 顧客データのリストを取得
+*ColorMeShop::CustomerApi* | [**post_customers**](docs/CustomerApi.md#post_customers) | **POST** /v1/customers | 顧客データを追加
+*ColorMeShop::DeliveryApi* | [**get_deliveries**](docs/DeliveryApi.md#get_deliveries) | **GET** /v1/deliveries | 配送方法一覧を取得
+*ColorMeShop::DeliveryApi* | [**get_delivery_date_setting**](docs/DeliveryApi.md#get_delivery_date_setting) | **GET** /v1/deliveries/date | 配送日時設定を取得
+*ColorMeShop::GiftApi* | [**get_gift**](docs/GiftApi.md#get_gift) | **GET** /v1/gift | ギフト設定を取得
+*ColorMeShop::GroupApi* | [**get_product_groups**](docs/GroupApi.md#get_product_groups) | **GET** /v1/groups | 商品グループ一覧を取得
+*ColorMeShop::PaymentApi* | [**get_payments**](docs/PaymentApi.md#get_payments) | **GET** /v1/payments | 決済設定の一覧を取得
+*ColorMeShop::ProductApi* | [**delete_product_pickup**](docs/ProductApi.md#delete_product_pickup) | **DELETE** /v1/products/{product_id}/pickups/{pickup_type} | おすすめ商品情報の削除
+*ColorMeShop::ProductApi* | [**get_product**](docs/ProductApi.md#get_product) | **GET** /v1/products/{product_id} | 商品データの取得
+*ColorMeShop::ProductApi* | [**get_product_variants**](docs/ProductApi.md#get_product_variants) | **GET** /v1/products/{product_id}/variants | 商品オプション一覧の取得
+*ColorMeShop::ProductApi* | [**get_products**](docs/ProductApi.md#get_products) | **GET** /v1/products | 商品一覧の取得
+*ColorMeShop::ProductApi* | [**post_product_pickup**](docs/ProductApi.md#post_product_pickup) | **POST** /v1/products/{product_id}/pickups | おすすめ商品情報の追加
+*ColorMeShop::ProductApi* | [**post_products**](docs/ProductApi.md#post_products) | **POST** /v1/products | 商品データの追加
+*ColorMeShop::ProductApi* | [**put_product_pickup**](docs/ProductApi.md#put_product_pickup) | **PUT** /v1/products/{product_id}/pickups | おすすめ商品情報の更新
+*ColorMeShop::ProductApi* | [**update_product**](docs/ProductApi.md#update_product) | **PUT** /v1/products/{product_id} | 商品データの更新
+*ColorMeShop::SaleApi* | [**cancel_sale**](docs/SaleApi.md#cancel_sale) | **PUT** /v1/sales/{sale_id}/cancel | 受注のキャンセル
+*ColorMeShop::SaleApi* | [**get_sale**](docs/SaleApi.md#get_sale) | **GET** /v1/sales/{sale_id} | 受注データの取得
+*ColorMeShop::SaleApi* | [**get_sales**](docs/SaleApi.md#get_sales) | **GET** /v1/sales | 受注データのリストを取得
+*ColorMeShop::SaleApi* | [**send_sales_mail**](docs/SaleApi.md#send_sales_mail) | **POST** /v1/sales/{sale_id}/mails | メールの送信
+*ColorMeShop::SaleApi* | [**stat_sale**](docs/SaleApi.md#stat_sale) | **GET** /v1/sales/stat | 売上集計の取得
+*ColorMeShop::SaleApi* | [**update_sale**](docs/SaleApi.md#update_sale) | **PUT** /v1/sales/{sale_id} | 受注データの更新
+*ColorMeShop::ShopApi* | [**get_shop**](docs/ShopApi.md#get_shop) | **GET** /v1/shop | ショップ情報の取得
+*ColorMeShop::ShopCouponApi* | [**get_coupon**](docs/ShopCouponApi.md#get_coupon) | **GET** /v1/shop_coupons/{coupon_id} | ショップクーポンの取得
+*ColorMeShop::ShopCouponApi* | [**get_coupons**](docs/ShopCouponApi.md#get_coupons) | **GET** /v1/shop_coupons | ショップクーポン一覧取得
+*ColorMeShop::StockApi* | [**get_stocks**](docs/StockApi.md#get_stocks) | **GET** /v1/stocks | 在庫情報の取得
 
 
 ## Documentation for Models
 
- - [ColorMeShop::ApplicationCharge](docs/ApplicationCharge.md)
- - [ColorMeShop::ApplicationChargeCreateResponse](docs/ApplicationChargeCreateResponse.md)
+ - [ColorMeShop::CancelSaleRequest](docs/CancelSaleRequest.md)
  - [ColorMeShop::Customer](docs/Customer.md)
  - [ColorMeShop::Delivery](docs/Delivery.md)
  - [ColorMeShop::DeliveryChargeByPrefecture](docs/DeliveryChargeByPrefecture.md)
  - [ColorMeShop::DeliveryDateSetting](docs/DeliveryDateSetting.md)
+ - [ColorMeShop::GetCoupon200Response](docs/GetCoupon200Response.md)
+ - [ColorMeShop::GetCoupons200Response](docs/GetCoupons200Response.md)
+ - [ColorMeShop::GetCoupons200ResponseShopCouponsInner](docs/GetCoupons200ResponseShopCouponsInner.md)
+ - [ColorMeShop::GetCustomer200Response](docs/GetCustomer200Response.md)
+ - [ColorMeShop::GetCustomer200ResponseMeta](docs/GetCustomer200ResponseMeta.md)
+ - [ColorMeShop::GetCustomers200Response](docs/GetCustomers200Response.md)
+ - [ColorMeShop::GetDeliveries200Response](docs/GetDeliveries200Response.md)
+ - [ColorMeShop::GetDeliveries200ResponseDeliveriesInner](docs/GetDeliveries200ResponseDeliveriesInner.md)
+ - [ColorMeShop::GetDeliveries200ResponseDeliveriesInnerCharge](docs/GetDeliveries200ResponseDeliveriesInnerCharge.md)
+ - [ColorMeShop::GetDeliveries200ResponseDeliveriesInnerChargeChargeRangesByAreaInner](docs/GetDeliveries200ResponseDeliveriesInnerChargeChargeRangesByAreaInner.md)
+ - [ColorMeShop::GetDeliveries200ResponseDeliveriesInnerChargeChargeRangesByWeightInnerInner](docs/GetDeliveries200ResponseDeliveriesInnerChargeChargeRangesByWeightInnerInner.md)
+ - [ColorMeShop::GetDeliveryDateSetting200Response](docs/GetDeliveryDateSetting200Response.md)
+ - [ColorMeShop::GetDeliveryDateSetting200ResponseDeliveryDate](docs/GetDeliveryDateSetting200ResponseDeliveryDate.md)
+ - [ColorMeShop::GetDeliveryDateSetting200ResponseDeliveryDateDays](docs/GetDeliveryDateSetting200ResponseDeliveryDateDays.md)
+ - [ColorMeShop::GetDeliveryDateSetting200ResponseDeliveryDateTimes](docs/GetDeliveryDateSetting200ResponseDeliveryDateTimes.md)
+ - [ColorMeShop::GetGift200Response](docs/GetGift200Response.md)
+ - [ColorMeShop::GetGift200ResponseGift](docs/GetGift200ResponseGift.md)
+ - [ColorMeShop::GetGift200ResponseGiftCard](docs/GetGift200ResponseGiftCard.md)
+ - [ColorMeShop::GetGift200ResponseGiftCardTypesInner](docs/GetGift200ResponseGiftCardTypesInner.md)
+ - [ColorMeShop::GetGift200ResponseGiftNoshi](docs/GetGift200ResponseGiftNoshi.md)
+ - [ColorMeShop::GetGift200ResponseGiftNoshiTypesInner](docs/GetGift200ResponseGiftNoshiTypesInner.md)
+ - [ColorMeShop::GetGift200ResponseGiftWrapping](docs/GetGift200ResponseGiftWrapping.md)
+ - [ColorMeShop::GetGift200ResponseGiftWrappingTypesInner](docs/GetGift200ResponseGiftWrappingTypesInner.md)
+ - [ColorMeShop::GetPayments200Response](docs/GetPayments200Response.md)
+ - [ColorMeShop::GetPayments200ResponsePaymentsInner](docs/GetPayments200ResponsePaymentsInner.md)
+ - [ColorMeShop::GetPayments200ResponsePaymentsInnerCard](docs/GetPayments200ResponsePaymentsInnerCard.md)
+ - [ColorMeShop::GetPayments200ResponsePaymentsInnerCardBrandsInner](docs/GetPayments200ResponsePaymentsInnerCardBrandsInner.md)
+ - [ColorMeShop::GetPayments200ResponsePaymentsInnerCod](docs/GetPayments200ResponsePaymentsInnerCod.md)
+ - [ColorMeShop::GetPayments200ResponsePaymentsInnerFinancial](docs/GetPayments200ResponsePaymentsInnerFinancial.md)
+ - [ColorMeShop::GetProductCategories200Response](docs/GetProductCategories200Response.md)
+ - [ColorMeShop::GetProductCategories200ResponseCategoriesInner](docs/GetProductCategories200ResponseCategoriesInner.md)
+ - [ColorMeShop::GetProductCategories200ResponseCategoriesInnerChildrenInner](docs/GetProductCategories200ResponseCategoriesInnerChildrenInner.md)
+ - [ColorMeShop::GetProductGroups200Response](docs/GetProductGroups200Response.md)
+ - [ColorMeShop::GetProductGroups200ResponseGroupsInner](docs/GetProductGroups200ResponseGroupsInner.md)
+ - [ColorMeShop::GetProductVariants200Response](docs/GetProductVariants200Response.md)
+ - [ColorMeShop::GetProducts200Response](docs/GetProducts200Response.md)
+ - [ColorMeShop::GetProducts200ResponseProductsInner](docs/GetProducts200ResponseProductsInner.md)
+ - [ColorMeShop::GetProducts200ResponseProductsInnerCategory](docs/GetProducts200ResponseProductsInnerCategory.md)
+ - [ColorMeShop::GetProducts200ResponseProductsInnerImagesInner](docs/GetProducts200ResponseProductsInnerImagesInner.md)
+ - [ColorMeShop::GetProducts200ResponseProductsInnerOptionsInner](docs/GetProducts200ResponseProductsInnerOptionsInner.md)
+ - [ColorMeShop::GetProducts200ResponseProductsInnerPickupsInner](docs/GetProducts200ResponseProductsInnerPickupsInner.md)
+ - [ColorMeShop::GetProducts200ResponseProductsInnerVariantsInner](docs/GetProducts200ResponseProductsInnerVariantsInner.md)
+ - [ColorMeShop::GetSale200Response](docs/GetSale200Response.md)
+ - [ColorMeShop::GetSale200ResponseSale](docs/GetSale200ResponseSale.md)
+ - [ColorMeShop::GetSale200ResponseSaleAllOfSegment](docs/GetSale200ResponseSaleAllOfSegment.md)
+ - [ColorMeShop::GetSales200Response](docs/GetSales200Response.md)
+ - [ColorMeShop::GetSales200ResponseMeta](docs/GetSales200ResponseMeta.md)
+ - [ColorMeShop::GetSales200ResponseSalesInner](docs/GetSales200ResponseSalesInner.md)
+ - [ColorMeShop::GetSales200ResponseSalesInnerCustomer](docs/GetSales200ResponseSalesInnerCustomer.md)
+ - [ColorMeShop::GetSales200ResponseSalesInnerDetailsInner](docs/GetSales200ResponseSalesInnerDetailsInner.md)
+ - [ColorMeShop::GetSales200ResponseSalesInnerSaleDeliveriesInner](docs/GetSales200ResponseSalesInnerSaleDeliveriesInner.md)
+ - [ColorMeShop::GetSales200ResponseSalesInnerSegment](docs/GetSales200ResponseSalesInnerSegment.md)
+ - [ColorMeShop::GetSales200ResponseSalesInnerTotals](docs/GetSales200ResponseSalesInnerTotals.md)
+ - [ColorMeShop::GetShop200Response](docs/GetShop200Response.md)
+ - [ColorMeShop::GetShop200ResponseShop](docs/GetShop200ResponseShop.md)
+ - [ColorMeShop::GetStocks200Response](docs/GetStocks200Response.md)
+ - [ColorMeShop::GetStocks200ResponseStocksInner](docs/GetStocks200ResponseStocksInner.md)
+ - [ColorMeShop::GetStocks200ResponseStocksInnerImagesInner](docs/GetStocks200ResponseStocksInnerImagesInner.md)
  - [ColorMeShop::Meta](docs/Meta.md)
  - [ColorMeShop::Payment](docs/Payment.md)
+ - [ColorMeShop::PostCustomers200Response](docs/PostCustomers200Response.md)
+ - [ColorMeShop::PostCustomersRequest](docs/PostCustomersRequest.md)
+ - [ColorMeShop::PostCustomersRequestCustomer](docs/PostCustomersRequestCustomer.md)
+ - [ColorMeShop::PostProducts200Response](docs/PostProducts200Response.md)
+ - [ColorMeShop::PostProductsRequest](docs/PostProductsRequest.md)
+ - [ColorMeShop::PostProductsRequestProduct](docs/PostProductsRequestProduct.md)
  - [ColorMeShop::Product](docs/Product.md)
  - [ColorMeShop::ProductCategory](docs/ProductCategory.md)
+ - [ColorMeShop::ProductCategoryChild](docs/ProductCategoryChild.md)
+ - [ColorMeShop::ProductCreateRequest](docs/ProductCreateRequest.md)
  - [ColorMeShop::ProductGroup](docs/ProductGroup.md)
  - [ColorMeShop::ProductOption](docs/ProductOption.md)
  - [ColorMeShop::ProductPickup](docs/ProductPickup.md)
  - [ColorMeShop::ProductUpdateRequest](docs/ProductUpdateRequest.md)
  - [ColorMeShop::ProductVariant](docs/ProductVariant.md)
- - [ColorMeShop::RecurringApplicationCharge](docs/RecurringApplicationCharge.md)
- - [ColorMeShop::RecurringApplicationChargeCreateResponse](docs/RecurringApplicationChargeCreateResponse.md)
+ - [ColorMeShop::PutProductPickup200Response](docs/PutProductPickup200Response.md)
+ - [ColorMeShop::PutProductPickup200ResponsePickup](docs/PutProductPickup200ResponsePickup.md)
+ - [ColorMeShop::PutProductPickupRequest](docs/PutProductPickupRequest.md)
  - [ColorMeShop::Sale](docs/Sale.md)
  - [ColorMeShop::SaleDelivery](docs/SaleDelivery.md)
  - [ColorMeShop::SaleDetail](docs/SaleDetail.md)
- - [ColorMeShop::ScriptTag](docs/ScriptTag.md)
+ - [ColorMeShop::SendSalesMailRequest](docs/SendSalesMailRequest.md)
+ - [ColorMeShop::SendSalesMailRequestMail](docs/SendSalesMailRequestMail.md)
  - [ColorMeShop::Shop](docs/Shop.md)
+ - [ColorMeShop::ShopCoupon](docs/ShopCoupon.md)
+ - [ColorMeShop::StatSale200Response](docs/StatSale200Response.md)
+ - [ColorMeShop::StatSale200ResponseSalesStat](docs/StatSale200ResponseSalesStat.md)
  - [ColorMeShop::Stock](docs/Stock.md)
+ - [ColorMeShop::UpdateProductRequest](docs/UpdateProductRequest.md)
+ - [ColorMeShop::UpdateProductRequestProduct](docs/UpdateProductRequestProduct.md)
+ - [ColorMeShop::UpdateProductRequestProductStocks](docs/UpdateProductRequestProductStocks.md)
+ - [ColorMeShop::UpdateProductRequestProductStocksOneOf](docs/UpdateProductRequestProductStocksOneOf.md)
+ - [ColorMeShop::UpdateProductRequestProductVariantsInner](docs/UpdateProductRequestProductVariantsInner.md)
+ - [ColorMeShop::UpdateProductRequestProductVariantsInnerStocks](docs/UpdateProductRequestProductVariantsInnerStocks.md)
+ - [ColorMeShop::UpdateSale200Response](docs/UpdateSale200Response.md)
+ - [ColorMeShop::UpdateSaleRequest](docs/UpdateSaleRequest.md)
+ - [ColorMeShop::UpdateSaleRequestSale](docs/UpdateSaleRequestSale.md)
 
 
 ## Documentation for Authorization
 
 
+Authentication schemes defined for the API:
 ### OAuth2
+
 
 - **Type**: OAuth
 - **Flow**: accessCode
@@ -271,4 +406,5 @@ Class | Method | HTTP request | Description
   - write_products: 在庫データを更新
   - read_sales: 受注・顧客データを参照
   - write_sales: 受注データを更新
+  - read_shop_coupons: ショップクーポンを参照
 
