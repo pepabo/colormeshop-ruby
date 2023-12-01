@@ -1,16 +1,17 @@
 =begin
 #カラーミーショップ API
 
-## カラーミーショップ API  [カラーミーショップ](https://shop-pro.jp) APIでは、受注の検索や商品情報の更新を行うことができます。  ## 利用手順  はじめに、カラーミーデベロッパーアカウントを用意します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。  次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリケーション登録を行ってください。 スマートフォンのWebViewを利用する場合は、リダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を入力してください。  その後、カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。  |パラメータ名|値| |---|---| |`client_id`|アプリケーション詳細画面で確認できるクライアントID| |`response_type`|\"code\"という文字列| |`scope`| 別表参照| |`redirect_url`|アプリケーション登録時に入力したリダイレクトURL|  `scope`は、以下のうち、アプリケーションが利用したい機能をスペース区切りで指定してください。  |スコープ|機能| |---|---| |`read_products`|商品データの参照| |`write_products`|在庫データの更新| |`read_sales`|受注・顧客データの参照| |`write_sales`|受注データの更新|  以下のようなURLとなります。  ``` https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URL&response_type=code&scope=read_products%20write_products ```  初めてこのページを訪れる場合は、カラーミーショップアカウントのIDとパスワードの入力を求められます。 承認ボタンを押すと、このアプリケーションがショップのデータにアクセスすることが許可され、リダイレクトURLへリダイレクトされます。  承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、 `error`パラメータにエラーの内容を表す文字列が与えられます。  アプリケーション登録時のリダイレクトURLに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされます。 末尾のパスが認可コードになっています。  ``` https://api.shop-pro.jp/oauth/authorize/AUTH_CODE ```  認可コードの有効期限は発行から10分間です。  最後に、認可コードとアクセストークンを交換します。以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。  |パラメータ名|値| |---|---| |`client_id`|アプリケーション詳細画面に表示されているクライアントID| |`client_secret`|アプリケーション詳細画面に表示されているクライアントシークレット| |`code`|取得した認可コード| |`grant_type`|\"authorization_code\"という文字列| |`redirect_uri`|アプリケーション登録時に入力したリダイレクトURL|  ```console # curl での例  $ curl -X POST \\   -d'client_id=CLIENT_ID' \\   -d'client_secret=CLIENT_SECRET' \\   -d'code=CODE' \\   -d'grant_type=authorization_code'   \\   -d'redirect_uri=REDIRECT_URI'  \\   'https://api.shop-pro.jp/oauth/token' ```  リクエストが成功すると、以下のようなJSONが返ってきます。  ```json {   \"access_token\": \"d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX\",   \"token_type\": \"bearer\",   \"scope\": \"read_products write_products\" } ```  アクセストークンに有効期限はありませんが、許可済みアプリケーション一覧画面から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。  取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する際の例を示します。  ```console # curlの例  $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json ```  ## エラー  カラーミーショップAPI v1では  - エラーコード - エラーメッセージ - ステータスコード  の配列でエラーを表現します。以下に例を示します。  ```json {   \"errors\": [     {       \"code\": 404100,       \"message\": \"レコードが見つかりませんでした。\",       \"status\": 404     }   ] } ``` 
+## カラーミーショップ API  ## 利用手順  ### OAuthアプリケーションの登録  デベロッパーアカウントをお持ちでない場合は作成します。[デベロッパー登録ページ](https://api.shop-pro.jp/developers/sign_up)から登録してください。  次に、[登録ページ](https://api.shop-pro.jp/oauth/applications/new)からアプリ登録を行ってください。 スマートフォンのWebViewを利用する場合は、リダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を入力してください。  ### 認可  カラーミーショップアカウントの認証ページを開きます。認証ページのURLは、`https://api.shop-pro.jp/oauth/authorize`に必要なパラメータをつけたものです。  |パラメータ名|値| |---|---| |`client_id`|アプリ詳細画面で確認できるクライアントID| |`response_type`|\"code\"を指定| |`scope`| 別表参照| |`redirect_uri`|アプリ登録時に入力したリダイレクトURI|  `scope`は、以下のうち、アプリが利用したい機能をスペース区切りで指定してください。  |スコープ|機能| |---|---| |`read_products`|商品データの参照| |`write_products`|在庫データの更新| |`read_sales`|受注・顧客データの参照| |`write_sales`|受注データの更新| |`read_shop_coupons`|ショップクーポンの参照|  以下のようなURLとなります。  ``` https://api.shop-pro.jp/oauth/authorize?client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&response_type=code&scope=read_products%20write_products ```  初めてこのページを訪れる場合は、カラーミーショップアカウントのログインIDとパスワードの入力を求められます。  ログイン後の認証ページでアプリとの連携が承認された場合は、`code`というクエリパラメータに認可コードが付与されます。承認がキャンセルされた、またはエラーが起きた場合は、 `error`パラメータにエラーの内容を表す文字列が与えられます。  アプリ登録時のリダイレクトURIに`urn:ietf:wg:oauth:2.0:oob`を指定した場合は、以下のようなURLにリダイレクトされ、 認可コードがURLの末尾に付与されます。  ``` https://api.shop-pro.jp/oauth/authorize/AUTH_CODE ```  認可コードの有効期限は発行から10分間です。  ### 認可コードをアクセストークンに交換  以下のパラメータを付けて、`https://api.shop-pro.jp/oauth/token`へリクエストを送ります。  |パラメータ名|値| |---|---| |`client_id`|アプリ詳細画面に表示されているクライアントID| |`client_secret`|アプリ詳細画面に表示されているクライアントシークレット| |`code`|取得した認可コード| |`grant_type`|\"authorization_code\"を指定| |`redirect_uri`|アプリ登録時に入力したリダイレクトURI|  curlによるリクエストの例を以下に示します。 ```console $ curl -X POST \\   -d'client_id=CLIENT_ID' \\   -d'client_secret=CLIENT_SECRET' \\   -d'code=CODE' \\   -d'grant_type=authorization_code'   \\   -d'redirect_uri=REDIRECT_URI'  \\   'https://api.shop-pro.jp/oauth/token' ```  リクエストが成功すると、以下のようなJSONが返却されます  ```json {   \"access_token\": \"d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX\",   \"token_type\": \"bearer\",   \"scope\": \"read_products write_products\" } ```  アクセストークンに有効期限はありませんが、[許可済みアプリ一覧画面](https://admin.shop-pro.jp/?mode=app_use_lst)から失効させることができます。なお、同じ認可コードをアクセストークンに交換できるのは1度だけです。  ### APIの利用  取得したアクセストークンは、Authorizationヘッダに入れて使用します。以下にショップ情報を取得する例を示します。  ```console $ curl -H 'Authorization: Bearer d461ab8XXXXXXXXXXXXXXXXXXXXXXXXX' https://api.shop-pro.jp/v1/shop.json ```  ## エラー  カラーミーショップAPIでは、以下の形式の配列でエラーを表現します。  - `code` エラーコード - `message` エラーメッセージ - `status` ステータスコード  ```json {   \"errors\": [     {       \"code\": 404100,       \"message\": \"レコードが見つかりませんでした。\",       \"status\": 404     }   ] } ```  ## 都道府県コードについて APIを利用して都道府県コードを更新したり、レスポンスを参照される際には以下の表を参考にしてください。  <details>   <summary>都道府県コード一覧</summary>    |id|都道府県|   |---|---|   |1|北海道|   |2|青森県|   |3|岩手県|   |4|秋田県|   |5|宮城県|   |6|山形県|   |7|福島県|   |8|茨城県|   |9|栃木県|   |10|群馬県|   |11|埼玉県|   |12|千葉県|   |13|東京都|   |14|神奈川県|   |15|新潟県|   |16|福井県|   |17|石川県|   |18|富山県|   |19|静岡県|   |20|山梨県|   |21|長野県|   |22|愛知県|   |23|岐阜県|   |24|三重県|   |25|和歌山県|   |26|滋賀県|   |27|奈良県|   |28|京都府|   |29|大阪府|   |30|兵庫県|   |31|岡山県|   |32|広島県|   |33|鳥取県|   |34|島根県|   |35|山口県|   |36|香川県|   |37|徳島県|   |38|愛媛県|   |39|高知県|   |40|福岡県|   |41|佐賀県|   |42|長崎県|   |43|大分県|   |44|熊本県|   |45|宮崎県|   |46|鹿児島県|   |47|沖縄県|   |48|海外|  </details> 
 
-OpenAPI spec version: 1.0.0
+The version of the OpenAPI document: 1.0.0
 
 Generated by: https://openapi-generator.tech
-OpenAPI Generator version: 3.2.0-SNAPSHOT
+OpenAPI Generator version: 7.2.0-SNAPSHOT
 
 =end
 
 require 'date'
+require 'time'
 
 module ColorMeShop
   class Payment
@@ -32,6 +33,9 @@ module ColorMeShop
     # 説明
     attr_accessor :memo
 
+    # 説明
+    attr_accessor :order_end_note
+
     # フィーチャーフォン向けショップ用の説明
     attr_accessor :memo_mobile
 
@@ -41,7 +45,7 @@ module ColorMeShop
     # 決済画像URL
     attr_accessor :image_url
 
-    # 決済タイプを表す数値。  |type|決済| |---|---| |0|代引き| |1|銀行振込| |2|郵便振替| |3|クレジット（ZEUS）| |4|クロネコ@ペイメント| |5|NP後払い| |6|クレジット（イプシロン）| |7|コンビニ決済（イプシロン）| |8|カラーミークレジット| |9|その他決済| |10|ウェブマネー| |11|イーバンクデビット| |12|ネット銀行（イプシロン）| |13|電子マネー（イプシロン）| |14|ATM・コンビニ・ネット銀行決済（ペイジェント）| |15|Do-Link決済（イプシロン）| |16|ペイジー（イプシロン）| |17|後払い.com| |18|ジャパンネット銀行（送料無料キャンペーン）| |19|クロネコwebコレクト| |20|PayPal（イプシロン）| |21|Yahoo!ウォレット（イプシロン）| |22|全額ポイント利用| |23|スマートフォンキャリア決済（イプシロン）| |24|GMO PG マルチペイメントクレジットカード| |25|住信SBIネット銀行（イプシロン）| |26|GMO後払い（イプシロン）| |27|GMO後払い（GMOペイメントサービス）| |28| - | |29|ATM（ペイジー）（ペイジェント）| |30|カード（ペイジェント）| |31|コンビニ番号方式（ペイジェント）| |32|インターネットバンキング（ペイジェント）| |33|PayPal（ペイパル）| |34|SMBC GMO PAYMENTクレジットカード| |35|Amazon Pay| |36|楽天ペイ（オンライン決済）| 
+    # 決済タイプを表す数値。  |type|決済| |---|---| |0|代引き| |1|銀行振込| |2|郵便振替| |3|クレジット（ZEUS）| |4|クロネコ@ペイメント| |5|NP後払い| |6|クレジット（イプシロン）| |7|コンビニ決済（イプシロン）| |8|カラーミークレジット| |9|その他決済| |10|ウェブマネー| |11|イーバンクデビット| |12|ネット銀行（イプシロン）| |13|電子マネー（イプシロン）| |14|ATM・コンビニ・ネット銀行決済（ペイジェント）| |15|Do-Link決済（イプシロン）| |16|ペイジー（イプシロン）| |17|後払い.com| |18|ジャパンネット銀行（送料無料キャンペーン）| |19|クロネコwebコレクト| |20|PayPal（イプシロン）| |21|Yahoo!ウォレット（イプシロン）| |22|全額ポイント利用| |23|スマートフォンキャリア決済（イプシロン）| |24|GMO PG マルチペイメントクレジットカード| |25|住信SBIネット銀行（イプシロン）| |26|GMO後払い（イプシロン）| |27|GMO後払い（GMOペイメントサービス）| |28| - | |29|ATM（ペイジー）（ペイジェント）| |30|カード（ペイジェント）| |31|コンビニ番号方式（ペイジェント）| |32|インターネットバンキング（ペイジェント）| |33|PayPal（ペイパル）| |34|SMBC GMO PAYMENTクレジットカード| |35|Amazon Pay（イプシロン）| |36|楽天ペイ（オンライン決済）| |37|銀行振込（バーチャル口座）（イプシロン）| |38|Amazon Pay（アマゾンペイ）| |39|クレジットカード（SGシステム）| |40|LINE Pay（イプシロン）| |41|PayPal Commerce Platform（ペイパル）| |42|PayPay（イプシロン）| |43|Amazon Pay V2（アマゾンペイ）| |44|Amazon Pay V2（イプシロン）| |45|Square対面決済| 
     attr_accessor :type
 
     # 表示設定。`true`なら表示される
@@ -56,13 +60,10 @@ module ColorMeShop
     # 決済更新日時
     attr_accessor :update_date
 
-    # 代引き決済の設定情報。代引き決済の場合のみ存在する
     attr_accessor :cod
 
-    # クレジットカードの設定情報。クレジットカード決済の場合のみ存在する
     attr_accessor :card
 
-    # 銀行振り込みの設定情報。銀行振り込み決済の場合のみ存在する
     attr_accessor :financial
 
     # Attribute mapping from ruby-style variable name to JSON key.
@@ -74,6 +75,7 @@ module ColorMeShop
         :'fee' => :'fee',
         :'ip_code' => :'ip_code',
         :'memo' => :'memo',
+        :'order_end_note' => :'order_end_note',
         :'memo_mobile' => :'memo_mobile',
         :'sort' => :'sort',
         :'image_url' => :'image_url',
@@ -88,6 +90,11 @@ module ColorMeShop
       }
     end
 
+    # Returns all the JSON keys this model knows about
+    def self.acceptable_attributes
+      attribute_map.values
+    end
+
     # Attribute type mapping.
     def self.openapi_types
       {
@@ -97,93 +104,118 @@ module ColorMeShop
         :'fee' => :'Integer',
         :'ip_code' => :'String',
         :'memo' => :'String',
+        :'order_end_note' => :'String',
         :'memo_mobile' => :'String',
         :'sort' => :'Integer',
         :'image_url' => :'String',
         :'type' => :'Integer',
-        :'display' => :'BOOLEAN',
-        :'use_mobile' => :'BOOLEAN',
+        :'display' => :'Boolean',
+        :'use_mobile' => :'Boolean',
         :'make_date' => :'Integer',
         :'update_date' => :'Integer',
-        :'cod' => :'Object',
-        :'card' => :'Object',
-        :'financial' => :'Object'
+        :'cod' => :'GetPayments200ResponsePaymentsInnerCod',
+        :'card' => :'GetPayments200ResponsePaymentsInnerCard',
+        :'financial' => :'GetPayments200ResponsePaymentsInnerFinancial'
       }
+    end
+
+    # List of attributes with nullable: true
+    def self.openapi_nullable
+      Set.new([
+        :'fee',
+        :'ip_code',
+        :'memo',
+        :'order_end_note',
+        :'memo_mobile',
+        :'sort',
+        :'image_url',
+      ])
     end
 
     # Initializes the object
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
-      return unless attributes.is_a?(Hash)
+      if (!attributes.is_a?(Hash))
+        fail ArgumentError, "The input argument (attributes) must be a hash in `ColorMeShop::Payment` initialize method"
+      end
 
-      # convert string to symbol for hash key
-      attributes = attributes.each_with_object({}) { |(k, v), h| h[k.to_sym] = v }
+      # check to see if the attribute exists and convert string to symbol for hash key
+      attributes = attributes.each_with_object({}) { |(k, v), h|
+        if (!self.class.attribute_map.key?(k.to_sym))
+          fail ArgumentError, "`#{k}` is not a valid attribute in `ColorMeShop::Payment`. Please check the name to make sure it's valid. List of attributes: " + self.class.attribute_map.keys.inspect
+        end
+        h[k.to_sym] = v
+      }
 
-      if attributes.has_key?(:'id')
+      if attributes.key?(:'id')
         self.id = attributes[:'id']
       end
 
-      if attributes.has_key?(:'account_id')
+      if attributes.key?(:'account_id')
         self.account_id = attributes[:'account_id']
       end
 
-      if attributes.has_key?(:'name')
+      if attributes.key?(:'name')
         self.name = attributes[:'name']
       end
 
-      if attributes.has_key?(:'fee')
+      if attributes.key?(:'fee')
         self.fee = attributes[:'fee']
       end
 
-      if attributes.has_key?(:'ip_code')
+      if attributes.key?(:'ip_code')
         self.ip_code = attributes[:'ip_code']
       end
 
-      if attributes.has_key?(:'memo')
+      if attributes.key?(:'memo')
         self.memo = attributes[:'memo']
       end
 
-      if attributes.has_key?(:'memo_mobile')
+      if attributes.key?(:'order_end_note')
+        self.order_end_note = attributes[:'order_end_note']
+      end
+
+      if attributes.key?(:'memo_mobile')
         self.memo_mobile = attributes[:'memo_mobile']
       end
 
-      if attributes.has_key?(:'sort')
+      if attributes.key?(:'sort')
         self.sort = attributes[:'sort']
       end
 
-      if attributes.has_key?(:'image_url')
+      if attributes.key?(:'image_url')
         self.image_url = attributes[:'image_url']
       end
 
-      if attributes.has_key?(:'type')
+      if attributes.key?(:'type')
         self.type = attributes[:'type']
       end
 
-      if attributes.has_key?(:'display')
+      if attributes.key?(:'display')
         self.display = attributes[:'display']
       end
 
-      if attributes.has_key?(:'use_mobile')
+      if attributes.key?(:'use_mobile')
         self.use_mobile = attributes[:'use_mobile']
       end
 
-      if attributes.has_key?(:'make_date')
+      if attributes.key?(:'make_date')
         self.make_date = attributes[:'make_date']
       end
 
-      if attributes.has_key?(:'update_date')
+      if attributes.key?(:'update_date')
         self.update_date = attributes[:'update_date']
       end
 
-      if attributes.has_key?(:'cod')
+      if attributes.key?(:'cod')
         self.cod = attributes[:'cod']
       end
 
-      if attributes.has_key?(:'card')
+      if attributes.key?(:'card')
         self.card = attributes[:'card']
       end
 
-      if attributes.has_key?(:'financial')
+      if attributes.key?(:'financial')
         self.financial = attributes[:'financial']
       end
     end
@@ -191,6 +223,7 @@ module ColorMeShop
     # Show invalid properties with the reasons. Usually used together with valid?
     # @return Array for valid properties with the reasons
     def list_invalid_properties
+      warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
       if !@type.nil? && @type < 0
         invalid_properties.push('invalid value for "type", must be greater than or equal to 0.')
@@ -202,6 +235,7 @@ module ColorMeShop
     # Check to see if the all the properties in the model are valid
     # @return true if the model is valid
     def valid?
+      warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if !@type.nil? && @type < 0
       true
     end
@@ -209,7 +243,11 @@ module ColorMeShop
     # Custom attribute writer method with validation
     # @param [Object] type Value to be assigned
     def type=(type)
-      if !type.nil? && type < 0
+      if type.nil?
+        fail ArgumentError, 'type cannot be nil'
+      end
+
+      if type < 0
         fail ArgumentError, 'invalid value for "type", must be greater than or equal to 0.'
       end
 
@@ -227,6 +265,7 @@ module ColorMeShop
           fee == o.fee &&
           ip_code == o.ip_code &&
           memo == o.memo &&
+          order_end_note == o.order_end_note &&
           memo_mobile == o.memo_mobile &&
           sort == o.sort &&
           image_url == o.image_url &&
@@ -247,39 +286,42 @@ module ColorMeShop
     end
 
     # Calculates hash code according to all attributes.
-    # @return [Fixnum] Hash code
+    # @return [Integer] Hash code
     def hash
-      [id, account_id, name, fee, ip_code, memo, memo_mobile, sort, image_url, type, display, use_mobile, make_date, update_date, cod, card, financial].hash
+      [id, account_id, name, fee, ip_code, memo, order_end_note, memo_mobile, sort, image_url, type, display, use_mobile, make_date, update_date, cod, card, financial].hash
     end
 
     # Builds the object from hash
     # @param [Hash] attributes Model attributes in the form of hash
     # @return [Object] Returns the model itself
-    def build_from_hash(attributes)
+    def self.build_from_hash(attributes)
       return nil unless attributes.is_a?(Hash)
-      self.class.openapi_types.each_pair do |key, type|
-        if type =~ /\AArray<(.*)>/i
-          # check to ensure the input is an array given that the the attribute
+      attributes = attributes.transform_keys(&:to_sym)
+      transformed_hash = {}
+      openapi_types.each_pair do |key, type|
+        if attributes.key?(attribute_map[key]) && attributes[attribute_map[key]].nil?
+          transformed_hash["#{key}"] = nil
+        elsif type =~ /\AArray<(.*)>/i
+          # check to ensure the input is an array given that the attribute
           # is documented as an array but the input is not
-          if attributes[self.class.attribute_map[key]].is_a?(Array)
-            self.send("#{key}=", attributes[self.class.attribute_map[key]].map { |v| _deserialize($1, v) })
+          if attributes[attribute_map[key]].is_a?(Array)
+            transformed_hash["#{key}"] = attributes[attribute_map[key]].map { |v| _deserialize($1, v) }
           end
-        elsif !attributes[self.class.attribute_map[key]].nil?
-          self.send("#{key}=", _deserialize(type, attributes[self.class.attribute_map[key]]))
-        end # or else data not found in attributes(hash), not an issue as the data can be optional
+        elsif !attributes[attribute_map[key]].nil?
+          transformed_hash["#{key}"] = _deserialize(type, attributes[attribute_map[key]])
+        end
       end
-
-      self
+      new(transformed_hash)
     end
 
     # Deserializes the data based on type
     # @param string type Data type
     # @param string value Value to be deserialized
     # @return [Object] Deserialized data
-    def _deserialize(type, value)
+    def self._deserialize(type, value)
       case type.to_sym
-      when :DateTime
-        DateTime.parse(value)
+      when :Time
+        Time.parse(value)
       when :Date
         Date.parse(value)
       when :String
@@ -288,7 +330,7 @@ module ColorMeShop
         value.to_i
       when :Float
         value.to_f
-      when :BOOLEAN
+      when :Boolean
         if value.to_s =~ /\A(true|t|yes|y|1)\z/i
           true
         else
@@ -309,8 +351,9 @@ module ColorMeShop
           end
         end
       else # model
-        temp_model = ColorMeShop.const_get(type).new
-        temp_model.build_from_hash(value)
+        # models (e.g. Pet) or oneOf
+        klass = ColorMeShop.const_get(type)
+        klass.respond_to?(:openapi_any_of) || klass.respond_to?(:openapi_one_of) ? klass.build(value) : klass.build_from_hash(value)
       end
     end
 
@@ -332,7 +375,11 @@ module ColorMeShop
       hash = {}
       self.class.attribute_map.each_pair do |attr, param|
         value = self.send(attr)
-        next if value.nil?
+        if value.nil?
+          is_nullable = self.class.openapi_nullable.include?(attr)
+          next if !is_nullable || (is_nullable && !instance_variable_defined?(:"@#{attr}"))
+        end
+
         hash[param] = _to_hash(value)
       end
       hash
@@ -355,5 +402,7 @@ module ColorMeShop
         value
       end
     end
+
   end
+
 end

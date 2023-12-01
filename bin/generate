@@ -5,8 +5,10 @@ set -eu
 ROOT_PATH=$(cd $(dirname $0)/.. && pwd)
 
 docker run --rm -v ${ROOT_PATH}:/local openapitools/openapi-generator-cli:latest generate \
-    -DmodelTests=false -DapiTests=false \
     -i https://api.shop-pro.jp/v1/swagger.json \
     -g ruby \
     -o /local/ \
+    --api-package color_me_shop \
+    --invoker-package color_me_shop \
+    --model-package color_me_shop \
     --additional-properties moduleName=ColorMeShop,gemAuthor="GMO Pepabo inc.",gemHomepage=https://shop-pro.jp,gemLicense=MIT,gemDescription="カラーミーショップAPIのRubyクライアントです。",gemVersion=1.1.0

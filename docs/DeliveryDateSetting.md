@@ -1,12 +1,26 @@
 # ColorMeShop::DeliveryDateSetting
 
 ## Properties
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**account_id** | **String** | ショップアカウントID | [optional] 
-**days** | **Object** | 配送希望日の設定 | [optional] 
-**times** | **Object** | 配送時間帯の設定 | [optional] 
-**make_date** | **Integer** | 配送日時設定作成日時 | [optional] 
-**update_date** | **Integer** | 配送日時設定更新日時 | [optional] 
 
+| Name | Type | Description | Notes |
+| ---- | ---- | ----------- | ----- |
+| **account_id** | **String** | ショップアカウントID | [optional] |
+| **days** | [**GetDeliveryDateSetting200ResponseDeliveryDateDays**](GetDeliveryDateSetting200ResponseDeliveryDateDays.md) |  | [optional] |
+| **times** | [**GetDeliveryDateSetting200ResponseDeliveryDateTimes**](GetDeliveryDateSetting200ResponseDeliveryDateTimes.md) |  | [optional] |
+| **make_date** | **Integer** | 配送日時設定作成日時 | [optional] |
+| **update_date** | **Integer** | 配送日時設定更新日時 | [optional] |
+
+## Example
+
+```ruby
+require 'color_me_shop'
+
+instance = ColorMeShop::DeliveryDateSetting.new(
+  account_id: PA01234567,
+  days: null,
+  times: null,
+  make_date: 1465784944,
+  update_date: 1494496809
+)
+```
 

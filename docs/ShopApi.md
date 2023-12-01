@@ -2,21 +2,23 @@
 
 All URIs are relative to *https://api.shop-pro.jp*
 
-Method | HTTP request | Description
-------------- | ------------- | -------------
-[**get_shop**](ShopApi.md#get_shop) | **GET** /v1/shop.json | ショップ情報の取得
+| Method | HTTP request | Description |
+| ------ | ------------ | ----------- |
+| [**get_shop**](ShopApi.md#get_shop) | **GET** /v1/shop | ショップ情報の取得 |
 
 
-# **get_shop**
-> Object get_shop
+## get_shop
+
+> <GetShop200Response> get_shop
 
 ショップ情報の取得
 
 ショップ名などの基本的な情報を取得することができるAPIです。 
 
-### Example
+### Examples
+
 ```ruby
-# load the gem
+require 'time'
 require 'color_me_shop'
 # setup authorization
 ColorMeShop.configure do |config|
@@ -27,20 +29,39 @@ end
 api_instance = ColorMeShop::ShopApi.new
 
 begin
-  #ショップ情報の取得
+  # ショップ情報の取得
   result = api_instance.get_shop
   p result
 rescue ColorMeShop::ApiError => e
-  puts "Exception when calling ShopApi->get_shop: #{e}"
+  puts "Error when calling ShopApi->get_shop: #{e}"
+end
+```
+
+#### Using the get_shop_with_http_info variant
+
+This returns an Array which contains the response data, status code and headers.
+
+> <Array(<GetShop200Response>, Integer, Hash)> get_shop_with_http_info
+
+```ruby
+begin
+  # ショップ情報の取得
+  data, status_code, headers = api_instance.get_shop_with_http_info
+  p status_code # => 2xx
+  p headers # => { ... }
+  p data # => <GetShop200Response>
+rescue ColorMeShop::ApiError => e
+  puts "Error when calling ShopApi->get_shop_with_http_info: #{e}"
 end
 ```
 
 ### Parameters
+
 This endpoint does not need any parameter.
 
 ### Return type
 
-**Object**
+[**GetShop200Response**](GetShop200Response.md)
 
 ### Authorization
 
@@ -48,8 +69,6 @@ This endpoint does not need any parameter.
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
